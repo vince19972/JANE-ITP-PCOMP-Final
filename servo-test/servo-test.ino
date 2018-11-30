@@ -64,26 +64,30 @@ void update_stage() {
           // do the actions...
             break;          
           /* ejection acceptable, module btn unlocked */
-          case 9:
+          case 2: // temp testing number
             currentStage = "activating_final";
             Serial.println("REGULAR 9");            
             // do the actions...
             break;            
         }
 
-        Serial.println(insertedTabletsNum);            
+//        Serial.println(insertedTabletsNum);            
         
       } else {                        
         
+//        Serial.println("in activating final stage");   
+        
         // enter condition switching        
         switch (insertedTabletsNum) {
-          case 8:
+          case 1: // temp testing number
             currentStage = "deactivated_regular";
             // do the actions...
+            Serial.println("end");              
             isRunning = false;
             break;            
-          case 10:
+          case 3: // temp testing number
             // do the actions...
+            Serial.println("enter advanced");              
             isActivatingStage = false;
             break;            
         }
@@ -176,16 +180,23 @@ void ModuleSet::updateBtnState() {
   if (readyToToggle) {
   
     // toggle btn state
-    if (btnIsOn == HIGH)
-      btnIsOn = LOW;
-    else
-      btnIsOn = HIGH;
+    if (btnIsOn == HIGH) btnIsOn = LOW;
+    else btnIsOn = HIGH;
 
     // update inserted tablets number
     if (isActivatingStage) {
       if (currentStage != "activating_final") {
         update_insertedTabletsNum(true);       
       } else {
+        // @TODO: try to figure out user is ejecting or inserting tablet
+        
+        // unlock modules 
+        btnIsLocked = false;
+
+        // update inserted tablets number
+        boolean enterLastTablet = !_btnWasOn && btnIsOn
+        if (enterLastTablet) insertedTabletsNum = modulesNum;
+        else insertedTabletsNum -= 1;
       }
     }
       
