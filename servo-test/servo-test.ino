@@ -86,14 +86,14 @@ void update_stage() {
             break;            
           case regularFinal_enter:
             // do the actions...
-            Serial.println("enter advanced");              
+            Serial.println("enter advanced");                     
             isActivatingStage = false;
             break;            
         }
       }
       
     } else {
-      if (currentStage != "deactivating_final") {
+//      if (currentStage != "deactivating_final") {
         switch (insertedTabletsNum) {
           case modulesNum:
             currentStage = "advanced_1";
@@ -124,22 +124,31 @@ void update_stage() {
             Serial.println("Advanced final");
             Serial.println(insertedTabletsNum);                           
             // do the actions...
-            break;                          
-        }
-      } else {
-        switch (insertedTabletsNum) {
-          case 1:
-            currentStage = "ending_advanced";
-            // do the actions...
-            isRunning = false;
-            break;                          
+            break;    
           case 0:
             currentStage = "deactivated_advanced";
+            Serial.println("Deactivated");
+            Serial.println(insertedTabletsNum);               
             // do the actions...
-            isRunning = false;
-            break;                          
+//            isRunning = false;
+            break;                                    
         }
-      }
+//      } 
+//      else 
+//      {
+//        switch (insertedTabletsNum) {
+//          case 1:
+//            currentStage = "ending_advanced";
+//            // do the actions...
+//            isRunning = false;
+//            break;                          
+//          case 0:
+//            currentStage = "deactivated_advanced";
+//            // do the actions...
+//            isRunning = false;
+//            break;                          
+//        }
+//      }
     }
   } else {
     currentStage = "sleeping";
@@ -202,7 +211,7 @@ void ModuleSet::updateBtnState() {
         else insertedTabletsNum -= 1;
       }
     } else {
-      btnIsLocked = false;
+      update_insertedTabletsNum(false);       
     }
       
     // update debounce time value
@@ -224,11 +233,9 @@ void ModuleSet::updateBtnState() {
         btnIsLocked = true;
       else
         btnIsLocked = false;
-    } 
-//    else 
-//    {
-//      btnIsLocked = true;
-//    }          
+    } else {
+      btnIsLocked = false;
+    }          
   }
   
   _btnWasOn = _btnRead;
