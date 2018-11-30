@@ -7,6 +7,10 @@
 
 /* vars */
 const int modulesNum = 3;
+const int regularFinal_end = modulesNum - 2;
+const int regularFinal_enter = modulesNum;
+const int advancedFinal_end = 0;
+
 const int tabletMovingDuration = 3000; // millis
 int insertedTabletsNum = 0;
 boolean isRunning = true; // true if user is here
@@ -30,7 +34,6 @@ void update_insertedTabletsNum(boolean toIncrease) {
 void update_stage() {
   
   if (isRunning) {
-    isActivatingStage = true;
 
     if (isActivatingStage) {
        
@@ -43,25 +46,25 @@ void update_stage() {
             currentStage = "sleeping";
             Serial.println("SLEEPING");
             Serial.println(insertedTabletsNum);
-          // do the actions...
+            // do the actions...
             break;
           case 1:
             currentStage = "regular_1";
             Serial.println("REGULAR 1");
             Serial.println(insertedTabletsNum);
-          // do the actions...
+            // do the actions...
             break;          
           case 4:
             currentStage = "regular_2";
             Serial.println("REGULAR 2");
             Serial.println(insertedTabletsNum);            
-          // do the actions...
+            // do the actions...
             break;          
           case 6:
             currentStage = "regular_3";
             Serial.println("REGULAR 3");
             Serial.println(insertedTabletsNum);                        
-          // do the actions...
+            // do the actions...
             break;          
           /* ejection acceptable, module btn unlocked */
           case 2: // temp testing number
@@ -70,22 +73,18 @@ void update_stage() {
             // do the actions...
             break;            
         }
-
-//        Serial.println(insertedTabletsNum);            
         
       } else {                        
         
-//        Serial.println("in activating final stage");   
-        
         // enter condition switching        
         switch (insertedTabletsNum) {
-          case 1: // temp testing number
+          case regularFinal_end:
             currentStage = "deactivated_regular";
             // do the actions...
             Serial.println("end");              
             isRunning = false;
             break;            
-          case 3: // temp testing number
+          case regularFinal_enter:
             // do the actions...
             Serial.println("enter advanced");              
             isActivatingStage = false;
@@ -94,51 +93,57 @@ void update_stage() {
       }
       
     } else {
-        if (currentStage != "deactivating_final") {
-          switch (insertedTabletsNum) {
-            case 10:
-              currentStage = "advanced_1";
+      if (currentStage != "deactivating_final") {
+        switch (insertedTabletsNum) {
+          case modulesNum:
+            currentStage = "advanced_1";
             // do the actions...
-              break;            
-            case 9:
-              currentStage = "advanced_2";
+            Serial.println("Advanced 1");
+            Serial.println(insertedTabletsNum);               
+            break;            
+          case 9:
+            currentStage = "advanced_2";
             // do the actions...
-              break;            
-            case 6:
-              currentStage = "advanced_3";
+            break;            
+          case 6:
+            currentStage = "advanced_3";
             // do the actions...
-              break;                        
-            case 4:
-              currentStage = "advanced_4";
+            break;                        
+          case 4:
+            currentStage = "advanced_4";
             // do the actions...
-              break;                        
-            case 2:
-              currentStage = "advanced_5";
+            break;                        
+          case 2:
+            currentStage = "advanced_5";
+            Serial.println("Advanced 2");
+            Serial.println(insertedTabletsNum);                                       
             // do the actions...
-              break;                        
-            case 1:
-              currentStage = "deactivating_final";
-              // do the actions...
-              break;                          
-          }
-        } else {
-          switch (insertedTabletsNum) {
-            case 1:
-              currentStage = "ending_advanced";
-              // do the actions...
-              isRunning = false;
-              break;                          
-            case 0:
-              currentStage = "deactivated_advanced";
-              // do the actions...
-              isRunning = false;
-              break;                          
-          }
+            break;                        
+          case 1:
+            currentStage = "deactivating_final";
+            Serial.println("Advanced final");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break;                          
+        }
+      } else {
+        switch (insertedTabletsNum) {
+          case 1:
+            currentStage = "ending_advanced";
+            // do the actions...
+            isRunning = false;
+            break;                          
+          case 0:
+            currentStage = "deactivated_advanced";
+            // do the actions...
+            isRunning = false;
+            break;                          
         }
       }
-    } else {
-      currentStage = "sleeping";
     }
+  } else {
+    currentStage = "sleeping";
+  }
 
 };
 
@@ -188,16 +193,16 @@ void ModuleSet::updateBtnState() {
       if (currentStage != "activating_final") {
         update_insertedTabletsNum(true);       
       } else {
-        // @TODO: try to figure out user is ejecting or inserting tablet
-        
         // unlock modules 
         btnIsLocked = false;
 
         // update inserted tablets number
-        boolean enterLastTablet = !_btnWasOn && btnIsOn
+        boolean enterLastTablet = !_btnWasOn && btnIsOn;
         if (enterLastTablet) insertedTabletsNum = modulesNum;
         else insertedTabletsNum -= 1;
       }
+    } else {
+      btnIsLocked = false;
     }
       
     // update debounce time value
@@ -219,12 +224,11 @@ void ModuleSet::updateBtnState() {
         btnIsLocked = true;
       else
         btnIsLocked = false;
-    } else {
-      btnIsLocked = true;
-    }          
-
-//    Serial.println(_btnPin);
-//    Serial.println(btnIsLocked);
+    } 
+//    else 
+//    {
+//      btnIsLocked = true;
+//    }          
   }
   
   _btnWasOn = _btnRead;
