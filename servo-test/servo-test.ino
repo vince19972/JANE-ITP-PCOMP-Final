@@ -109,8 +109,7 @@ void update_stage() {
 */
 class ModuleSet {
   public:
-//    ModuleSet(Servo servo, int btnPin);
-    void init(int btnPin, int servoPin);
+    ModuleSet(Servo servo, int btnPin);
     void updateBtnState();
     void moveTablet();
 
@@ -128,18 +127,10 @@ class ModuleSet {
     unsigned long _time = 0;
 };
 
-//ModuleSet::ModuleSet(Servo servo, int btnPin) {
-//  _servo = servo;
-//  _btnPin = btnPin;
-//};
-
-void ModuleSet::init(int btnPin, int servoPin) {
-  _servoPin = servoPin;
+ModuleSet::ModuleSet(Servo servo, int btnPin) {
+  _servo = servo;
   _btnPin = btnPin;
-
-  _servo.attach(_servoPin);
-  pinMode(_btnPin, INPUT);  
-}
+};
 
 void ModuleSet::updateBtnState() {
   _btnRead = digitalRead(_btnPin);
@@ -198,29 +189,27 @@ void ModuleSet::moveTablet() {
 /* servos */
 const int servoStartNum = 21;
 
-//Servo servo_1;
-//const int servo_1_pin = servoStartNum + 0;      
-//Servo servo_2;
-//const int servo_2_pin = servoStartNum + 1;
-//Servo servo_3;
-//const int servo_3_pin = servoStartNum + 2;
+Servo servo_1;
+const int servo_1_pin = servoStartNum + 0;      
+Servo servo_2;
+const int servo_2_pin = servoStartNum + 1;
+Servo servo_3;
+const int servo_3_pin = servoStartNum + 2;
 
 /* btns */
 const int btnStartNum = 31;
 
-//const int btnPin_1 = btnStartNum + 0;
-//int btnRead_1 = 0;
-//ModuleSet ModuleSet_1(servo_1, btnPin_1);
-//
-//const int btnPin_2 = btnStartNum + 1;
-//int btnRead_2 = 0;
-//ModuleSet ModuleSet_2(servo_2, btnPin_2);
-//
-//const int btnPin_3 = btnStartNum + 2;
-//int btnRead_3 = 0;
-//ModuleSet ModuleSet_3(servo_3, btnPin_3);
+const int btnPin_1 = btnStartNum + 0;
+int btnRead_1 = 0;
+ModuleSet ModuleSet_1(servo_1, btnPin_1);
 
-ModuleSet *moduleSets[modulesNum];
+const int btnPin_2 = btnStartNum + 1;
+int btnRead_2 = 0;
+ModuleSet ModuleSet_2(servo_2, btnPin_2);
+
+const int btnPin_3 = btnStartNum + 2;
+int btnRead_3 = 0;
+ModuleSet ModuleSet_3(servo_3, btnPin_3);
 
 /* others */
 int pos = 0;
@@ -232,42 +221,26 @@ int pos = 0;
 void setup() {
   Serial.begin(9600);
 
-  for (int i = 0; i < modulesNum; ++i) {
-    int btnPin = btnStartNum + i;
-    int servoPin = servoStartNum + i;
-
-    moduleSets[i] -> init(btnPin, servoPin);
-  }  
-
-  Serial.println(moduleSets[0] -> _servoPin);
-  Serial.println(moduleSets[1] -> _servoPin);  
-  Serial.println(moduleSets[2] -> _servoPin);    
-
 //  Serial.print(moduleSets);
 
   // init servos
-//  servo_1.attach(servo_1_pin);
-//  servo_2.attach(servo_2_pin);
-//  servo_3.attach(servo_3_pin);
+  servo_1.attach(servo_1_pin);
+  servo_2.attach(servo_2_pin);
+  servo_3.attach(servo_3_pin);
 
   // init btns
-//  pinMode(btnPin_1, INPUT);
-//  pinMode(btnPin_2, INPUT);
-//  pinMode(btnPin_3, INPUT);
+  pinMode(btnPin_1, INPUT);
+  pinMode(btnPin_2, INPUT);
+  pinMode(btnPin_3, INPUT);
 }
 
 /*
    loop
 */
 void loop() {
-//  for (int i = 0; i < modulesNum; ++i) {    
-//    moduleSets[i] -> moveTablet();
-//    Serial.println(&moduleSets[i].btnIsOn);
-//  }    
-
-//  ModuleSet_1.moveTablet();
-//  ModuleSet_2.moveTablet();
-//  ModuleSet_3.moveTablet();
+  ModuleSet_1.moveTablet();
+  ModuleSet_2.moveTablet();
+  ModuleSet_3.moveTablet();
   //  ModuleSet_1.updateBtnState();
   //  ModuleSet_2.updateBtnState();
   //  ModuleSet_3.updateBtnState();
