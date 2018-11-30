@@ -20,70 +20,102 @@ void update_insertedTabletsNum(boolean toIncrease) {
   boolean readyToIncrease = (toIncrease && insertedTabletsNum < modulesNum && !tabletsAllIn);
   boolean readyToDecrease = (!toIncrease && insertedTabletsNum > 0 && !tabletsAllOut);
 
-  if (readyToIncrease) insertedTabletsNum -= 1;
-  if (readyToDecrease) insertedTabletsNum += 1;
+//  Serial.println(toIncrease);
+  
+  if (readyToIncrease) insertedTabletsNum += 1;
+  if (readyToDecrease) insertedTabletsNum -= 1;
 };
 
 /* state machine */
 void update_stage() {
+  
   if (isRunning) {
     isActivatingStage = true;
 
-    if (isActivatingStage) { 
+    if (isActivatingStage) {
+       
       if (currentStage != "activating_final") {
+        
         // enter condition switching
         switch (insertedTabletsNum) {
           /* ejection denied, module btn locked after inserted */
           case 0:
             currentStage = "sleeping";
+            Serial.println("SLEEPING");
+            Serial.println(insertedTabletsNum);
           // do the actions...
+            break;
           case 1:
             currentStage = "regular_1";
+            Serial.println("REGULAR 1");
+            Serial.println(insertedTabletsNum);
           // do the actions...
+            break;          
           case 4:
             currentStage = "regular_2";
+            Serial.println("REGULAR 2");
+            Serial.println(insertedTabletsNum);            
           // do the actions...
+            break;          
           case 6:
             currentStage = "regular_3";
+            Serial.println("REGULAR 3");
+            Serial.println(insertedTabletsNum);                        
           // do the actions...
+            break;          
           /* ejection acceptable, module btn unlocked */
           case 9:
             currentStage = "activating_final";
+            Serial.println("REGULAR 9");            
             // do the actions...
+            break;            
         }
-      } else {      
+
+        Serial.println(insertedTabletsNum);            
+        
+      } else {                        
+        
         // enter condition switching        
         switch (insertedTabletsNum) {
           case 8:
             currentStage = "deactivated_regular";
             // do the actions...
             isRunning = false;
+            break;            
           case 10:
             // do the actions...
             isActivatingStage = false;
+            break;            
         }
       }
+      
     } else {
         if (currentStage != "deactivating_final") {
           switch (insertedTabletsNum) {
             case 10:
               currentStage = "advanced_1";
             // do the actions...
+              break;            
             case 9:
               currentStage = "advanced_2";
             // do the actions...
+              break;            
             case 6:
               currentStage = "advanced_3";
             // do the actions...
+              break;                        
             case 4:
               currentStage = "advanced_4";
             // do the actions...
+              break;                        
             case 2:
               currentStage = "advanced_5";
             // do the actions...
+              break;                        
             case 1:
               currentStage = "deactivating_final";
               // do the actions...
+              break;                          
           }
         } else {
           switch (insertedTabletsNum) {
@@ -91,16 +123,19 @@ void update_stage() {
               currentStage = "ending_advanced";
               // do the actions...
               isRunning = false;
+              break;                          
             case 0:
               currentStage = "deactivated_advanced";
               // do the actions...
               isRunning = false;
+              break;                          
           }
         }
       }
     } else {
-    currentStage = "sleeping";
-  }
+      currentStage = "sleeping";
+    }
+
 };
 
 
@@ -137,8 +172,6 @@ void ModuleSet::updateBtnState() {
   boolean debouncePassed = (_btnRead == HIGH && _btnWasOn == LOW && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
-//  Serial.println(_btnRead);
-
   // btn is not locked, switch btn state
   if (readyToToggle) {
   
@@ -147,6 +180,14 @@ void ModuleSet::updateBtnState() {
       btnIsOn = LOW;
     else
       btnIsOn = HIGH;
+
+    // update inserted tablets number
+    if (isActivatingStage) {
+      if (currentStage != "activating_final") {
+        update_insertedTabletsNum(true);       
+      } else {
+      }
+    }
       
     // update debounce time value
     _time = millis();
@@ -170,6 +211,9 @@ void ModuleSet::updateBtnState() {
     } else {
       btnIsLocked = true;
     }          
+
+//    Serial.println(_btnPin);
+//    Serial.println(btnIsLocked);
   }
   
   _btnWasOn = _btnRead;
@@ -177,9 +221,8 @@ void ModuleSet::updateBtnState() {
 
 void ModuleSet::moveTablet() {
   updateBtnState();
+  update_stage();  
 //  Serial.println(btnIsLocked);
-
-  //   update_insertedTabletsNum();
 }
 
 /*
@@ -221,8 +264,6 @@ int pos = 0;
 void setup() {
   Serial.begin(9600);
 
-//  Serial.print(moduleSets);
-
   // init servos
   servo_1.attach(servo_1_pin);
   servo_2.attach(servo_2_pin);
@@ -241,8 +282,4 @@ void loop() {
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
-  //  ModuleSet_1.updateBtnState();
-  //  ModuleSet_2.updateBtnState();
-  //  ModuleSet_3.updateBtnState();
-
 }
