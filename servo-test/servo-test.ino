@@ -23,26 +23,26 @@ void update_insertedTabletsNum(boolean toIncrease) {
 String update_stage() {
   if (isRunning) {
     isActivatingStage = true;
-    
+
     if (isActivatingStage) {
       if (currentStage != "activating_final") {
         switch (insertedTabletsNum) {
           case 0:
             currentStage = "sleeping";
-            // do the actions...
+          // do the actions...
           case 1:
             currentStage = "regular_1";
-            // do the actions...
+          // do the actions...
           case 4:
             currentStage = "regular_2";
-            // do the actions...
+          // do the actions...
           case 6:
-            currentStage = "regular_3";      
-            // do the actions...
+            currentStage = "regular_3";
+          // do the actions...
           case 9:
-            currentStage = "activating_final";            
+            currentStage = "activating_final";
             // do the actions...
-        }         
+        }
       } else {
         switch (insertedTabletsNum) {
           case 8:
@@ -52,29 +52,30 @@ String update_stage() {
           case 10:
             // do the actions...
             isActivatingStage = false;
-      }    
+        }
+      }
     } else {
       if (currentStage != "deactivating_final") {
-        switch (insertedTabletsNum) {   
+        switch (insertedTabletsNum) {
           case 10:
-            currentStage = "advanced_1";  
-            // do the actions...
+            currentStage = "advanced_1";
+          // do the actions...
           case 9:
-            currentStage = "advanced_2";  
-            // do the actions...
+            currentStage = "advanced_2";
+          // do the actions...
           case 6:
-            currentStage = "advanced_3";  
-            // do the actions...
+            currentStage = "advanced_3";
+          // do the actions...
           case 4:
-            currentStage = "advanced_4";  
-            // do the actions...
+            currentStage = "advanced_4";
+          // do the actions...
           case 2:
-            currentStage = "advanced_5"; 
-            // do the actions...
+            currentStage = "advanced_5";
+          // do the actions...
           case 1:
             currentStage = "deactivating_final";
             // do the actions...
-        }           
+        }
       } else {
         switch (insertedTabletsNum) {
           case 1:
@@ -82,11 +83,13 @@ String update_stage() {
             // do the actions...
             isRunning = false;
           case 0:
-            currentStage = "deactivated_advanced";          
+            currentStage = "deactivated_advanced";
             // do the actions...
             isRunning = false;
+        }
       }
-  } else {  
+    }
+  } else {
     currentStage = "sleeping";
   }
 };
