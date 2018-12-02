@@ -90,14 +90,14 @@ void moveModule() {
       Serial.println("regular_9");
       Serial.println(insertedTabletsNum);      
     }                          
-    else if (currentStage == "activating_final") 
+    else if (currentStage == "regular_final") 
     {
-      Serial.println("activating_final");
+      Serial.println("regular_final");
       Serial.println(insertedTabletsNum);      
     }                              
-    else if (currentStage == "deactivated_regular") 
+    else if (currentStage == "regular_deactivated") 
     {
-      Serial.println("deactivated_regular");
+      Serial.println("regular_deactivated");
       Serial.println(insertedTabletsNum);      
       isRunning = false;      
     } 
@@ -146,14 +146,14 @@ void moveModule() {
       Serial.println("advanced_8");
       Serial.println(insertedTabletsNum);        
     }  
-    else if (currentStage == "activating_final") 
+    else if (currentStage == "advanced_final") 
     {
-      Serial.println("activating_final");
+      Serial.println("advanced_final");
       Serial.println(insertedTabletsNum);        
     }     
-    else if (currentStage == "deactivated_advanced") 
+    else if (currentStage == "advanced_deactivated") 
     {
-      Serial.println("deactivated_advanced");
+      Serial.println("advanced_deactivated");
       Serial.println(insertedTabletsNum);   
       isRunning = false;
       currentStage = "sleeping";             
@@ -167,7 +167,7 @@ void update_stage() {
 
     if (isActivatingStage) {
 
-      if (currentStage != "activating_final") {
+      if (currentStage != "regular_final") {
 
         // enter condition switching
         switch (insertedTabletsNum) {
@@ -201,7 +201,7 @@ void update_stage() {
             break;
           /* ejection acceptable, module btn unlocked (9 tablets) */
           case modulesNum - 1:
-            currentStage = "activating_final";
+            currentStage = "regular_final";
             break;
         }
         moveModule();
@@ -210,7 +210,7 @@ void update_stage() {
         // enter condition switching
         switch (insertedTabletsNum) {
           case regularFinal_end:
-            currentStage = "deactivated_regular";
+            currentStage = "regular_deactivated";
             moveModule();
             break;
           case regularFinal_enter:
@@ -249,10 +249,10 @@ void update_stage() {
           currentStage = "advanced_8";
           break;
         case 1:
-          currentStage = "deactivating_final";
+          currentStage = "advanced_final";
           break;
         case 0:
-          currentStage = "deactivated_advanced";
+          currentStage = "advanced_deactivated";
           break;
       }
       
@@ -363,7 +363,7 @@ void ModuleSet::updateBtnState() {
 
     // update inserted tablets number
     if (isActivatingStage) {
-      if (currentStage != "activating_final") {
+      if (currentStage != "regular_final") {
         update_insertedTabletsNum(true);
       } else {
         // unlock modules
@@ -423,7 +423,7 @@ void ModuleSet::updateBtnState() {
     // btn is locked, but check if it should be unlocked or not
     if (debouncePassed) {
       if (isActivatingStage) {
-        if (currentStage != "activating_final")
+        if (currentStage != "regular_final")
           btnIsLocked = true;
         else
           btnIsLocked = false;
