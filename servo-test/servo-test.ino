@@ -6,7 +6,7 @@
 */
 
 /* vars */
-const int modulesNum = 3;
+const int modulesNum = 10;
 const int regularFinal_end = modulesNum - 2;
 const int regularFinal_enter = modulesNum;
 const int advancedFinal_end = 0;
@@ -67,7 +67,7 @@ void update_stage() {
             // do the actions...
             break;          
           /* ejection acceptable, module btn unlocked */
-          case 2: // temp testing number
+          case modulesNum - 1: 
             currentStage = "activating_final";
             Serial.println("REGULAR 9");            
             // do the actions...
@@ -190,8 +190,13 @@ void ModuleSet::updateBtnState() {
   boolean debouncePassed = (_btnRead == HIGH && _btnWasOn == LOW && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
+//  Serial.println(_btnRead);
+
   // btn is not locked, switch btn state
   if (readyToToggle) {
+
+    Serial.println("ready to toggle");
+    _servo.write(180);
   
     // toggle btn state
     if (btnIsOn == HIGH) btnIsOn = LOW;
@@ -243,7 +248,7 @@ void ModuleSet::updateBtnState() {
 
 void ModuleSet::moveTablet() {
   updateBtnState();
-  update_stage();  
+//  update_stage();  
 //  Serial.println(btnIsLocked);
 }
 
@@ -260,9 +265,23 @@ Servo servo_2;
 const int servo_2_pin = servoStartNum + 1;
 Servo servo_3;
 const int servo_3_pin = servoStartNum + 2;
+Servo servo_4;
+const int servo_4_pin = servoStartNum + 3;
+Servo servo_5;
+const int servo_5_pin = servoStartNum + 4;
+Servo servo_6;
+const int servo_6_pin = servoStartNum + 5;
+Servo servo_7;
+const int servo_7_pin = servoStartNum + 6;
+Servo servo_8;
+const int servo_8_pin = servoStartNum + 7;
+Servo servo_9;
+const int servo_9_pin = servoStartNum + 8;
+Servo servo_10;
+const int servo_10_pin = servoStartNum + 9;
 
 /* btns */
-const int btnStartNum = 31;
+const int btnStartNum = 41;
 
 const int btnPin_1 = btnStartNum + 0;
 int btnRead_1 = 0;
@@ -276,6 +295,34 @@ const int btnPin_3 = btnStartNum + 2;
 int btnRead_3 = 0;
 ModuleSet ModuleSet_3(servo_3, btnPin_3);
 
+const int btnPin_4 = btnStartNum + 3;
+int btnRead_4 = 0;
+ModuleSet ModuleSet_4(servo_4, btnPin_4);
+
+const int btnPin_5 = btnStartNum + 4;
+int btnRead_5 = 0;
+ModuleSet ModuleSet_5(servo_5, btnPin_5);
+
+const int btnPin_6 = btnStartNum + 5;
+int btnRead_6 = 0;
+ModuleSet ModuleSet_6(servo_6, btnPin_6);
+
+const int btnPin_7 = btnStartNum + 6;
+int btnRead_7 = 0;
+ModuleSet ModuleSet_7(servo_7, btnPin_7);
+
+const int btnPin_8 = btnStartNum + 7;
+int btnRead_8 = 0;
+ModuleSet ModuleSet_8(servo_8, btnPin_8);
+
+const int btnPin_9 = btnStartNum + 8;
+int btnRead_9 = 0;
+ModuleSet ModuleSet_9(servo_9, btnPin_9);
+
+const int btnPin_10 = btnStartNum + 9;
+int btnRead_10 = 0;
+ModuleSet ModuleSet_10(servo_10, btnPin_10);
+
 /* others */
 int pos = 0;
 
@@ -288,20 +335,42 @@ void setup() {
 
   // init servos
   servo_1.attach(servo_1_pin);
-  servo_2.attach(servo_2_pin);
-  servo_3.attach(servo_3_pin);
+//  servo_2.attach(servo_2_pin);
+//  servo_3.attach(servo_3_pin);
+//  servo_4.attach(servo_4_pin);
+//  servo_5.attach(servo_5_pin);
+//  servo_6.attach(servo_6_pin);
+//  servo_7.attach(servo_7_pin);        
+//  servo_8.attach(servo_8_pin);        
+//  servo_9.attach(servo_9_pin);        
+//  servo_10.attach(servo_10_pin);              
 
   // init btns
   pinMode(btnPin_1, INPUT);
-  pinMode(btnPin_2, INPUT);
-  pinMode(btnPin_3, INPUT);
+//  pinMode(btnPin_2, INPUT);
+//  pinMode(btnPin_3, INPUT);
+//  pinMode(btnPin_4, INPUT);
+//  pinMode(btnPin_5, INPUT);
+//  pinMode(btnPin_6, INPUT);
+//  pinMode(btnPin_7, INPUT);
+//  pinMode(btnPin_8, INPUT);
+//  pinMode(btnPin_9, INPUT);
+//  pinMode(btnPin_10, INPUT);
 }
 
 /*
    loop
 */
 void loop() {
-  ModuleSet_1.moveTablet();
-  ModuleSet_2.moveTablet();
-  ModuleSet_3.moveTablet();
+//  ModuleSet_1.moveTablet();
+  servo_1.write(180);
+//  ModuleSet_2.moveTablet();
+//  ModuleSet_3.moveTablet();
+//  ModuleSet_4.moveTablet();
+//  ModuleSet_5.moveTablet();
+//  ModuleSet_6.moveTablet();
+//  ModuleSet_7.moveTablet();
+//  ModuleSet_8.moveTablet();
+//  ModuleSet_9.moveTablet();
+//  ModuleSet_10.moveTablet();    
 }
