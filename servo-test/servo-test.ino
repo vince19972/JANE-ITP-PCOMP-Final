@@ -53,23 +53,53 @@ void update_stage() {
             Serial.println("REGULAR 1");
             Serial.println(insertedTabletsNum);
             // do the actions...
-            break;          
-          case 4:
+            break;   
+          case 2:
             currentStage = "regular_2";
             Serial.println("REGULAR 2");
-            Serial.println(insertedTabletsNum);            
+            Serial.println(insertedTabletsNum);
             // do the actions...
-            break;          
-          case 6:
+            break;   
+          case 3:
             currentStage = "regular_3";
             Serial.println("REGULAR 3");
+            Serial.println(insertedTabletsNum);
+            // do the actions...
+            break;                                  
+          case 4:
+            currentStage = "regular_4";
+            Serial.println("REGULAR 4");
+            Serial.println(insertedTabletsNum);            
+            // do the actions...
+            break;    
+          case 5:
+            currentStage = "regular_5";
+            Serial.println("REGULAR 5");
+            Serial.println(insertedTabletsNum);
+            // do the actions...
+            break;                     
+          case 6:
+            currentStage = "regular_6";
+            Serial.println("REGULAR 6");
             Serial.println(insertedTabletsNum);                        
             // do the actions...
-            break;          
-          /* ejection acceptable, module btn unlocked */
+            break;       
+          case 7:
+            currentStage = "regular_7";
+            Serial.println("REGULAR 7");
+            Serial.println(insertedTabletsNum);
+            // do the actions...
+            break;  
+          case 8:
+            currentStage = "regular_8";
+            Serial.println("REGULAR 8");
+            Serial.println(insertedTabletsNum);
+            // do the actions...
+            break;   
+          /* ejection acceptable, module btn unlocked (9 tablets) */
           case modulesNum - 1: 
             currentStage = "activating_final";
-            Serial.println("REGULAR 9");            
+            Serial.println("ACTIVATION FINAL");            
             // do the actions...
             break;            
         }
@@ -96,26 +126,56 @@ void update_stage() {
 //      if (currentStage != "deactivating_final") {
         switch (insertedTabletsNum) {
           case modulesNum:
-            currentStage = "advanced_1";
+            currentStage = "advanced_0";
             // do the actions...
-            Serial.println("Advanced 1");
+            Serial.println("Advanced 0");
             Serial.println(insertedTabletsNum);               
             break;            
           case 9:
+            currentStage = "advanced_1";
+            Serial.println("Advanced 1");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break;     
+          case 8:
             currentStage = "advanced_2";
-            // do the actions...
-            break;            
-          case 6:
-            currentStage = "advanced_3";
-            // do the actions...
-            break;                        
-          case 4:
-            currentStage = "advanced_4";
-            // do the actions...
-            break;                        
-          case 2:
-            currentStage = "advanced_5";
             Serial.println("Advanced 2");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break; 
+          case 7:
+            currentStage = "advanced_3";
+            Serial.println("Advanced 3");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break;                                    
+          case 6:
+            currentStage = "advanced_4";
+            Serial.println("Advanced 4");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break;       
+          case 5:
+            currentStage = "advanced_5";
+            Serial.println("Advanced 5");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break;                              
+          case 4:
+            currentStage = "advanced_6";
+            Serial.println("Advanced 6");
+            Serial.println(insertedTabletsNum);                                       
+            // do the actions...
+            break;     
+          case 3:
+            currentStage = "advanced_7";
+            Serial.println("Advanced 7");
+            Serial.println(insertedTabletsNum);                           
+            // do the actions...
+            break;                                
+          case 2:
+            currentStage = "advanced_8";
+            Serial.println("Advanced 8");
             Serial.println(insertedTabletsNum);                                       
             // do the actions...
             break;                        
@@ -248,7 +308,7 @@ void ModuleSet::updateBtnState() {
 
 void ModuleSet::moveTablet() {
   updateBtnState();
-//  update_stage();  
+  update_stage();  
 //  Serial.println(btnIsLocked);
 }
 
@@ -335,42 +395,41 @@ void setup() {
 
   // init servos
   servo_1.attach(servo_1_pin);
-//  servo_2.attach(servo_2_pin);
-//  servo_3.attach(servo_3_pin);
-//  servo_4.attach(servo_4_pin);
-//  servo_5.attach(servo_5_pin);
-//  servo_6.attach(servo_6_pin);
-//  servo_7.attach(servo_7_pin);        
-//  servo_8.attach(servo_8_pin);        
-//  servo_9.attach(servo_9_pin);        
-//  servo_10.attach(servo_10_pin);              
+  servo_2.attach(servo_2_pin);
+  servo_3.attach(servo_3_pin);
+  servo_4.attach(servo_4_pin);
+  servo_5.attach(servo_5_pin);
+  servo_6.attach(servo_6_pin);
+  servo_7.attach(servo_7_pin);        
+  servo_8.attach(servo_8_pin);        
+  servo_9.attach(servo_9_pin);        
+  servo_10.attach(servo_10_pin);              
 
   // init btns
   pinMode(btnPin_1, INPUT);
-//  pinMode(btnPin_2, INPUT);
-//  pinMode(btnPin_3, INPUT);
-//  pinMode(btnPin_4, INPUT);
-//  pinMode(btnPin_5, INPUT);
-//  pinMode(btnPin_6, INPUT);
-//  pinMode(btnPin_7, INPUT);
-//  pinMode(btnPin_8, INPUT);
-//  pinMode(btnPin_9, INPUT);
-//  pinMode(btnPin_10, INPUT);
+  pinMode(btnPin_2, INPUT);
+  pinMode(btnPin_3, INPUT);
+  pinMode(btnPin_4, INPUT);
+  pinMode(btnPin_5, INPUT);
+  pinMode(btnPin_6, INPUT);
+  pinMode(btnPin_7, INPUT);
+  pinMode(btnPin_8, INPUT);
+  pinMode(btnPin_9, INPUT);
+  pinMode(btnPin_10, INPUT);
 }
 
 /*
    loop
 */
 void loop() {
-//  ModuleSet_1.moveTablet();
-  servo_1.write(180);
-//  ModuleSet_2.moveTablet();
-//  ModuleSet_3.moveTablet();
-//  ModuleSet_4.moveTablet();
-//  ModuleSet_5.moveTablet();
-//  ModuleSet_6.moveTablet();
-//  ModuleSet_7.moveTablet();
-//  ModuleSet_8.moveTablet();
-//  ModuleSet_9.moveTablet();
-//  ModuleSet_10.moveTablet();    
+  ModuleSet_1.moveTablet();
+  ModuleSet_2.moveTablet();
+  ModuleSet_3.moveTablet();
+  ModuleSet_4.moveTablet();
+  ModuleSet_5.moveTablet();
+  ModuleSet_6.moveTablet();
+  ModuleSet_7.moveTablet();
+  ModuleSet_8.moveTablet();
+  ModuleSet_9.moveTablet();
+  ModuleSet_10.moveTablet();    
 }
