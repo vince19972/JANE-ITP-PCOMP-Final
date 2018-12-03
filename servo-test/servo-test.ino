@@ -37,7 +37,7 @@ void update_insertedTabletsNum(boolean toIncrease) {
 void moveModule() {
     if (currentStage == "sleeping") 
     {
-      Serial.println("sleeping");
+//      Serial.println("sleeping");
       Serial.println(insertedTabletsNum);      
     } 
     else if (currentStage == "regular_1") 
@@ -53,11 +53,6 @@ void moveModule() {
     else if (currentStage == "regular_3") 
     {
       Serial.println("regular_3");
-      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_4") 
-    {
-      Serial.println("regular_4");
       Serial.println(insertedTabletsNum);      
     }
     else if (currentStage == "regular_4") 
@@ -204,7 +199,7 @@ void update_stage() {
             currentStage = "regular_final";
             break;
         }
-        moveModule();
+//        moveModule();
         
       } else {
         // enter condition switching
@@ -256,11 +251,11 @@ void update_stage() {
           break;
       }
       
-      moveModule();
+//      moveModule();
     }
   } else {
     currentStage = "sleeping";
-    moveModule();
+//    moveModule();
   }
 
 };
@@ -560,4 +555,7 @@ void loop() {
   ModuleSet_8.moveTablet();
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
+
+//  Serial.println(currentStage); 
+  Serial.println(currentStage);
 }
