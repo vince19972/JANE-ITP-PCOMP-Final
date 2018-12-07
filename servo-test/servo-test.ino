@@ -162,7 +162,7 @@ void update_stage() {
 
     if (isActivatingStage) {
 
-      if (currentStage != "regular_final") {
+      if (currentStage != "regular_9") {
 
         // enter condition switching
         switch (insertedTabletsNum) {
@@ -196,7 +196,7 @@ void update_stage() {
             break;
           /* ejection acceptable, module btn unlocked (9 tablets) */
           case modulesNum - 1:
-            currentStage = "regular_final";
+            currentStage = "regular_9";
             break;
         }
         moveModule();
@@ -209,6 +209,8 @@ void update_stage() {
             moveModule();
             break;
           case regularFinal_enter:
+            currentStage = "regular_final";
+            delay(500);
             isActivatingStage = false;
             break;
         }

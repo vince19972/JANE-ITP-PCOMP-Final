@@ -276,12 +276,17 @@ function draw() {
     case 'regular_8':
       set.activateAction(false, false, a7.isPlaying())
       break
-    case 'regular_final':
+    case 'regular_9':
       set.activateAction({
         soundFile: a9,
+        startTime: false
+      })
+      break
+    case 'regular_final':
+      set.activateAction({
+        soundFile: a10,
         startTime: 3
       }, () => {
-        a10.play()
         s10.start()
         s1.stop()
         s2.stop()
@@ -290,51 +295,63 @@ function draw() {
         s5.stop()
         s6.stop()
         s7.stop()
-      }, a7.isPlaying())
+      }, a9.isPlaying())
       break
     case 'regular_deactivated':
       console.log('regular deactivated')
       break
     case 'advanced_0':
+      set.activateAction({
+        soundFile: a10,
+        startTime: 3
+      }, () => {
+        s10.start()
+        s1.stop()
+        s2.stop()
+        s3.stop()
+        s4.stop()
+        s5.stop()
+        s6.stop()
+        s7.stop()
+      }, a9.isPlaying())
       flags.enteredState.regular_final = true
-      if (!a10.isPlaying() && !set.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
-        d9.play()
-        flags.enteredState[store.currentState] = true
-      }
       break
     case 'advanced_1':
+      if (!a10.isPlaying() && !set.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+        set.deactivateAction(d9, false, true)
+      }
+      break
+    case 'advanced_2':
       set.deactivateAction(d9, function() {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
-    case 'advanced_2':
+    case 'advanced_3':
       set.deactivateAction(d7, false, true)
       break
-    case 'advanced_3':
+    case 'advanced_4':
       set.deactivateAction(d7, function() {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
-    case 'advanced_4':
+    case 'advanced_5':
       set.deactivateAction(d5, false, true)
       break
-    case 'advanced_5':
+    case 'advanced_6':
       set.deactivateAction(d5, function() {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
-    case 'advanced_6':
+    case 'advanced_7':
       set.deactivateAction(d3, false, true)
       break
-    case 'advanced_7':
+    case 'advanced_8':
       set.deactivateAction(d3, function() {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
-    case 'advanced_8':
-      set.deactivateAction(d1, false, true)
-      break
     case 'advanced_final':
+      set.deactivateAction(d1, false, true)
       console.log('advanced final')
       break
     case 'advanced_deactivated':
