@@ -2,8 +2,13 @@
 var text		// variable for the text div you'll create
 var socket = new WebSocket("ws://localhost:8081")
 
+const flags = {
+  isPlayingSound: false
+}
 // mal
-// var currentStage = 'sleeping'
+function fmtData(data) {
+  return data.slice(0, -1)
+}
 
 //voice:
 var regular_1, regular_3, regular_5, regular_7, regular_9, regular_10, urg_1, urg_2
@@ -43,6 +48,11 @@ function setup() {
   text.position(10,10)
 
   currentStage = 'sleeping'
+
+  // regular_0.play()
+  // regular_0.onended(function() {
+  //   alert('test')
+  // })
 }
 function openSocket() {
   text.html("Socket open")
@@ -50,18 +60,22 @@ function openSocket() {
 }
 
 function draw() {
-  // console.log(currentStage)
-  currentStage = currentStage.slice(0, -1)
-  console.log(currentStage)
+  const fmtString = fmtData(currentStage)
 
-  switch (currentStage) {
+  switch (fmtString) {
     case 'sleeping':
-      regular_0.play()
-      console.log('sleeping now')
+      if (!flags.isPlayingSound) {
+        regular_0.play()
+        flags.isPlayingSound = true
+      }
+      regular_0.onended(() => flags.isPlayingSound = false)
       break
     case 'regular_1':
-      regular_1.play()
-      console.log('regular one now')
+      if (!flags.isPlayingSound) {
+        regular_1.play()
+        flags.isPlayingSound = true
+      }
+      regular_1.onended(() => flags.isPlayingSound = false)
       break
     case 'regular_2':
       break
