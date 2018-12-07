@@ -11,8 +11,8 @@ const int regularFinal_end = modulesNum - 2;
 const int regularFinal_enter = modulesNum;
 const int advancedFinal_end = 0;
 
-const int servoStartNum = 21;
-const int btnStartNum = 41;
+const int servoStartNum = 11;
+const int btnStartNum = 31;
 
 const int tabletMovingDuration = 3000; // millis
 int insertedTabletsNum = 0;
@@ -38,118 +38,118 @@ void moveModule() {
     if (currentStage == "sleeping") 
     {
 //      Serial.println("sleeping");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println(insertedTabletsNum);      
     } 
     else if (currentStage == "regular_1") 
     {
-      Serial.println("regular_1");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_1");
+//      Serial.println(insertedTabletsNum);      
     } 
     else if (currentStage == "regular_2") 
     {
-      Serial.println("regular_2");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_2");
+//      Serial.println(insertedTabletsNum);      
     } 
     else if (currentStage == "regular_3") 
     {
-      Serial.println("regular_3");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_3");
+//      Serial.println(insertedTabletsNum);      
     }
     else if (currentStage == "regular_4") 
     {
-      Serial.println("regular_4");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_4");
+//      Serial.println(insertedTabletsNum);      
     }
     else if (currentStage == "regular_5") 
     {
-      Serial.println("regular_5");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_5");
+//      Serial.println(insertedTabletsNum);      
     }
     else if (currentStage == "regular_6") 
     {
-      Serial.println("regular_6");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_6");
+//      Serial.println(insertedTabletsNum);      
     }
     else if (currentStage == "regular_7") 
     {
-      Serial.println("regular_7");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_7");
+//      Serial.println(insertedTabletsNum);      
     }
     else if (currentStage == "regular_8") 
     {
-      Serial.println("regular_8");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_8");
+//      Serial.println(insertedTabletsNum);      
     }                        
     else if (currentStage == "regular_9") 
     {
-      Serial.println("regular_9");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_9");
+//      Serial.println(insertedTabletsNum);      
     }                          
     else if (currentStage == "regular_final") 
     {
-      Serial.println("regular_final");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_final");
+//      Serial.println(insertedTabletsNum);      
     }                              
     else if (currentStage == "regular_deactivated") 
     {
-      Serial.println("regular_deactivated");
-      Serial.println(insertedTabletsNum);      
+//      Serial.println("regular_deactivated");
+//      Serial.println(insertedTabletsNum);      
       isRunning = false;      
     } 
     else if (currentStage == "advanced_0") 
     {
-      Serial.println("advanced_0");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_0");
+//      Serial.println(insertedTabletsNum);        
     }       
     else if (currentStage == "advanced_1") 
     {
-      Serial.println("advanced_1");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_1");
+//      Serial.println(insertedTabletsNum);        
     }    
     else if (currentStage == "advanced_2") 
     {
-      Serial.println("advanced_2");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_2");
+//      Serial.println(insertedTabletsNum);        
     }    
     else if (currentStage == "advanced_3") 
     {
-      Serial.println("advanced_3");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_3");
+//      Serial.println(insertedTabletsNum);        
     }       
     else if (currentStage == "advanced_4") 
     {
-      Serial.println("advanced_4");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_4");
+//      Serial.println(insertedTabletsNum);        
     }    
     else if (currentStage == "advanced_5") 
     {
-      Serial.println("advanced_5");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_5");
+//      Serial.println(insertedTabletsNum);        
     }    
     else if (currentStage == "advanced_6") 
     {
-      Serial.println("advanced_6");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_6");
+//      Serial.println(insertedTabletsNum);        
     }       
     else if (currentStage == "advanced_7") 
     {
-      Serial.println("advanced_7");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_7");
+//      Serial.println(insertedTabletsNum);        
     }    
     else if (currentStage == "advanced_8") 
     {
-      Serial.println("advanced_8");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_8");
+//      Serial.println(insertedTabletsNum);        
     }  
     else if (currentStage == "advanced_final") 
     {
-      Serial.println("advanced_final");
-      Serial.println(insertedTabletsNum);        
+//      Serial.println("advanced_final");
+//      Serial.println(insertedTabletsNum);        
     }     
     else if (currentStage == "advanced_deactivated") 
     {
-      Serial.println("advanced_deactivated");
-      Serial.println(insertedTabletsNum);   
+//      Serial.println("advanced_deactivated");
+//      Serial.println(insertedTabletsNum);   
       isRunning = false;
       currentStage = "sleeping";             
     }                                                                               
@@ -199,7 +199,7 @@ void update_stage() {
             currentStage = "regular_final";
             break;
         }
-//        moveModule();
+        moveModule();
         
       } else {
         // enter condition switching
@@ -251,11 +251,11 @@ void update_stage() {
           break;
       }
       
-//      moveModule();
+      moveModule();
     }
   } else {
     currentStage = "sleeping";
-//    moveModule();
+    moveModule();
   }
 
 };
@@ -351,6 +351,9 @@ void ModuleSet::updateBtnState() {
 
   // btn is not locked, switch btn state
   if (readyToToggle) {
+
+//    Serial.println(_btnRead);
+//    Serial.println(_btnPin);
 
     // toggle btn state
     if (btnIsOn == HIGH) btnIsOn = LOW;
@@ -518,15 +521,25 @@ void setup() {
 
   // init servos
   servo_1.attach(servo_1_pin);
+  servo_1.write(0);
   servo_2.attach(servo_2_pin);
+  servo_2.write(0);
   servo_3.attach(servo_3_pin);
+  servo_3.write(0);
   servo_4.attach(servo_4_pin);
+  servo_4.write(0);
   servo_5.attach(servo_5_pin);
+  servo_5.write(0);
   servo_6.attach(servo_6_pin);
+  servo_6.write(0);
   servo_7.attach(servo_7_pin);
+  servo_7.write(0);
   servo_8.attach(servo_8_pin);
+  servo_8.write(0);
   servo_9.attach(servo_9_pin);
+  servo_9.write(0);
   servo_10.attach(servo_10_pin);
+  servo_10.write(0);
 
   // init btns
   pinMode(btnPin_1, INPUT);
@@ -556,6 +569,6 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
-//  Serial.println(currentStage); 
-  Serial.println(currentStage);
+  Serial.println(currentStage); 
+//  Serial.println(currentStage);
 }
