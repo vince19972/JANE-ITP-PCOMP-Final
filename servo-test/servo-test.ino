@@ -1,5 +1,23 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+#define PIN 7
+#define N_LEDS 60
+
+/*
+   neo pixel settings
+*/
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN);
+//int R = 10;
+int G = 0;
+//int B = 10;
+int s = 1;
+// for blinking
+unsigned long buttonPressedTime;
 
 /*
     global store
@@ -35,124 +53,15 @@ void update_insertedTabletsNum(boolean toIncrease) {
 
 /* state actions */
 void moveModule() {
-    if (currentStage == "sleeping") 
-    {
-//      Serial.println("sleeping");
-//      Serial.println(insertedTabletsNum);      
-    } 
-    else if (currentStage == "regular_1") 
-    {
-//      Serial.println("regular_1");
-//      Serial.println(insertedTabletsNum);      
-    } 
-    else if (currentStage == "regular_2") 
-    {
-//      Serial.println("regular_2");
-//      Serial.println(insertedTabletsNum);      
-    } 
-    else if (currentStage == "regular_3") 
-    {
-//      Serial.println("regular_3");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_4") 
-    {
-//      Serial.println("regular_4");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_5") 
-    {
-//      Serial.println("regular_5");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_6") 
-    {
-//      Serial.println("regular_6");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_7") 
-    {
-//      Serial.println("regular_7");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_8") 
-    {
-//      Serial.println("regular_8");
-//      Serial.println(insertedTabletsNum);      
-    }                        
-    else if (currentStage == "regular_9") 
-    {
-//      Serial.println("regular_9");
-//      Serial.println(insertedTabletsNum);      
-    }                          
-    else if (currentStage == "regular_final") 
-    {
-//      Serial.println("regular_final");
-//      Serial.println(insertedTabletsNum);      
-    }                              
-    else if (currentStage == "regular_deactivated") 
-    {
-//      Serial.println("regular_deactivated");
-//      Serial.println(insertedTabletsNum);      
-      isRunning = false;      
-    } 
-    else if (currentStage == "advanced_0") 
-    {
-//      Serial.println("advanced_0");
-//      Serial.println(insertedTabletsNum);        
-    }       
-    else if (currentStage == "advanced_1") 
-    {
-//      Serial.println("advanced_1");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_2") 
-    {
-//      Serial.println("advanced_2");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_3") 
-    {
-//      Serial.println("advanced_3");
-//      Serial.println(insertedTabletsNum);        
-    }       
-    else if (currentStage == "advanced_4") 
-    {
-//      Serial.println("advanced_4");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_5") 
-    {
-//      Serial.println("advanced_5");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_6") 
-    {
-//      Serial.println("advanced_6");
-//      Serial.println(insertedTabletsNum);        
-    }       
-    else if (currentStage == "advanced_7") 
-    {
-//      Serial.println("advanced_7");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_8") 
-    {
-//      Serial.println("advanced_8");
-//      Serial.println(insertedTabletsNum);        
-    }  
-    else if (currentStage == "advanced_final") 
-    {
-//      Serial.println("advanced_final");
-//      Serial.println(insertedTabletsNum);        
-    }     
-    else if (currentStage == "advanced_deactivated") 
-    {
-//      Serial.println("advanced_deactivated");
-//      Serial.println(insertedTabletsNum);   
-      isRunning = false;
-      currentStage = "sleeping";             
-    }                                                                               
+  if (currentStage == "regular_deactivated")
+  {
+    isRunning = false;
+  }
+  else if (currentStage == "advanced_deactivated")
+  {
+    isRunning = false;
+    currentStage = "sleeping";
+  }
 }
 
 /* state machine */
@@ -200,7 +109,7 @@ void update_stage() {
             break;
         }
         moveModule();
-        
+
       } else {
         // enter condition switching
         switch (insertedTabletsNum) {
@@ -210,7 +119,6 @@ void update_stage() {
             break;
           case regularFinal_enter:
             currentStage = "regular_final";
-            delay(500);
             isActivatingStage = false;
             break;
         }
@@ -252,7 +160,7 @@ void update_stage() {
           currentStage = "advanced_deactivated";
           break;
       }
-      
+
       moveModule();
     }
   } else {
@@ -271,7 +179,8 @@ class ModuleSet {
     ModuleSet(Servo servo, int btnPin);
     void updateBtnState();
     void moveTablet();
-    
+    void updateNeopixels();
+
     int _servoPin;
     int _btnPin;
     Servo _servo;
@@ -305,6 +214,14 @@ ModuleSet::ModuleSet(Servo servo, int btnPin) {
   _servo = servo;
   _btnPin = btnPin;
 };
+
+void ModuleSet::updateNeopixels() {
+  int range = (_btnPin % 10) * 6;
+  Serial.println("test");
+  if (isActivatingStage) {
+    neo_green(range);
+  }
+}
 
 void ModuleSet::updateBtnState() {
   _btnRead = digitalRead(_btnPin);
@@ -354,15 +271,13 @@ void ModuleSet::updateBtnState() {
   // btn is not locked, switch btn state
   if (readyToToggle) {
 
-//    Serial.println(_btnRead);
-//    Serial.println(_btnPin);
-
     // toggle btn state
     if (btnIsOn == HIGH) btnIsOn = LOW;
     else btnIsOn = HIGH;
 
     // update inserted tablets number
     if (isActivatingStage) {
+      Serial.println(_btnPin);
       if (currentStage != "regular_final") {
         update_insertedTabletsNum(true);
       } else {
@@ -374,6 +289,7 @@ void ModuleSet::updateBtnState() {
         if (enterLastTablet) insertedTabletsNum = modulesNum;
         else insertedTabletsNum -= 1;
       }
+      
     } else {
       switch (insertedTabletsNum) {
         case modulesNum:
@@ -554,6 +470,9 @@ void setup() {
   pinMode(btnPin_8, INPUT);
   pinMode(btnPin_9, INPUT);
   pinMode(btnPin_10, INPUT);
+
+  // neo pixels
+  initNeoPixels();
 }
 
 /*
@@ -571,6 +490,95 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
-  Serial.println(currentStage); 
-//  Serial.println(currentStage);
+  Serial.println(currentStage);
+}
+
+
+/*
+** neo pixels functions
+*/
+
+void neo_allWhite() {
+  for (int i = 0; i < 60; i++) {
+    strip.setPixelColor(i, 255, 255, 255);
+  }
+  strip.show();  
+}
+
+void neo_green(int range) {
+  // blink for 0.7s when module moving  
+  for (int i = range - 5; i <= range; i++) {
+    strip.setPixelColor(i, 0, G, 0);
+  }
+  strip.show();
+}
+
+void initNeoPixels() {
+  strip.begin();
+  strip.show();
+
+  // record time when button pressed
+  buttonPressedTime = millis();
+}
+
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for (j = 0; j < 256; j++) {
+    for (i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i + j) & 255));
+    }
+    strip.show();
+//    delay(wait);
+  }
+}
+
+void theaterChase(uint32_t c, uint8_t wait) {
+  for (int j = 0; j < 10; j++) { //do 10 cycles of chasing
+    for (int q = 0; q < 3; q++) {
+      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
+        strip.setPixelColor(i + q, c);  //turn every third pixel on
+      }
+      strip.show();
+
+//      delay(wait);
+
+      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
+        strip.setPixelColor(i + q, 0);      //turn every third pixel off
+      }
+    }
+  }
+}
+
+void theaterChaseRainbow(uint8_t wait) {
+  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
+    for (int q = 0; q < 3; q++) {
+      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
+        //        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+        strip.setPixelColor(i + q, 255 - (i + j) % 255 * 3, 0, (i + j) % 255 * 3); //turn every third pixel on
+      }
+      strip.show();
+
+//      delay(wait);
+
+      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
+        strip.setPixelColor(i + q, 0);      //turn every third pixel off
+      }
+    }
+  }
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if (WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
