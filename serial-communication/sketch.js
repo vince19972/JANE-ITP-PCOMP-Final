@@ -32,11 +32,10 @@ const set = {
     return data.slice(0, -1)
   },
   stateAction(soundFileObj, toneCallback = false, prevIsPlaying = true) {
+    console.log(store.currentState)
     if (!flags.isPlayingSound && !prevIsPlaying && !flags.enteredState[store.currentState]) {
-      console.log(store.currentState)
       // default p5 soundfile play
       if (soundFileObj) {
-        console.log(store.currentState)
         console.log(soundFileObj)
         const {soundFile, startTime} = soundFileObj
         if (startTime)
@@ -52,7 +51,6 @@ const set = {
       }
 
       // tone.js callback
-      console.log(toneCallback)
       if (toneCallback) toneCallback()
     } else {
       update.isPlaying(false)
@@ -189,7 +187,7 @@ function draw() {
       set.stateAction({
         soundFile: a0,
         startTime: false
-      })
+      }, false, false)
       break
     case 'regular_1':
       set.stateAction({
@@ -228,12 +226,7 @@ function draw() {
       }, () => s7.start(), a5.isPlaying())
       break
     case 'regular_8':
-      break
-    case 'regular_9':
-      set.stateAction({
-        soundFile: a9,
-        startTime: false
-      }, false, a7.isPlaying())
+      set.stateAction(false, false, a7.isPlaying())
       break
     case 'regular_final':
       set.stateAction({
