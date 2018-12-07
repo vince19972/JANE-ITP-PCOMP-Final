@@ -281,6 +281,7 @@ function draw() {
         soundFile: a9,
         startTime: 3
       }, () => {
+        a10.play()
         s10.start()
         s1.stop()
         s2.stop()
@@ -295,7 +296,6 @@ function draw() {
       console.log('regular deactivated')
       break
     case 'advanced_0':
-      a10.play()
       flags.enteredState.regular_final = true
       if (!a10.isPlaying() && !set.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
         d9.play()
