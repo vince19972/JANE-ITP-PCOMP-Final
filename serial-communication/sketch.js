@@ -8,7 +8,10 @@ var socket = new WebSocket('ws://localhost:8081')
 */
 const store = {
   currentState: 'sleeping',
-  prevSoundFile: ''
+  prevSoundFile: '',
+  counter: 0,
+  lastTime: 0,
+  currentTime: 0
 }
 const flags = {
   isPlayingSound: false,
@@ -24,6 +27,15 @@ const flags = {
     regular_8: false,
     regular_9: false,
     regular_final: false,
+    advanced_1: false,
+    advanced_2: false,
+    advanced_3: false,
+    advanced_4: false,
+    advanced_5: false,
+    advanced_6: false,
+    advanced_7: false,
+    advanced_8: false,
+    advanced_9: false,
   }
 }
 
@@ -31,7 +43,7 @@ const set = {
   fmtData(data) {
     return data.slice(0, -1)
   },
-  stateAction(soundFileObj, toneCallback = false, prevIsPlaying = true) {
+  activateAction(soundFileObj, toneCallback = false, prevIsPlaying = true) {
     console.log(store.currentState)
     if (!flags.isPlayingSound && !prevIsPlaying && !flags.enteredState[store.currentState]) {
       // default p5 soundfile play
@@ -56,6 +68,42 @@ const set = {
       update.isPlaying(false)
     }
     flags.enteredState[store.currentState] = true
+  },
+  deactivateAction(soundFile = false, toneCallback = false, isToPlay = false) {
+    console.log(store.currentState)
+    console.log(flags.enteredState[store.currentState])
+    if(!set.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+      if (isToPlay) {
+        soundFile.play()
+      } else {
+        if(soundFile.isPlaying()) {
+          if (soundFile) soundFile.stop()
+          if (toneCallback) toneCallback()
+        }
+      }
+    }
+    flags.enteredState[store.currentState] = true
+  },
+  startUploadingTimer() {
+    if (millis() - store.lastTime > 7000 && store.counter < uploadingVoice.length) {
+      console.log("uploading in progess")
+      uploadingVoice[counter].play()
+      if (store.counter < uploadingSound.length) {
+        uploadingSound[counter].start()
+      }
+      store.counter++
+      store.lastTime = millis()
+    } else if (d9.isPlaying() || d7.isPlaying() || d5.isPlaying() || d3.isPlaying() || d1.isPlaying()) {
+      store.lastTime = millis()
+    }
+  },
+  uploadingVoiceIsPlaying() {
+    let numOfUploadingVoices = uploadingVoice.filter(_voice => _voice.isPlaying() == true).length
+    if (numOfUploadingVoices == 1) {
+      return true
+    } else if (numOfUploadingVoices == 0) {
+      return false
+    }
   }
 }
 
@@ -184,13 +232,13 @@ function draw() {
 
   switch (fmtString) {
     case 'sleeping':
-      set.stateAction({
+      set.activateAction({
         soundFile: a0,
         startTime: false
       }, false, false)
       break
     case 'regular_1':
-      set.stateAction({
+      set.activateAction({
         soundFile: a1,
         startTime: 3
       }, () => {
@@ -199,40 +247,41 @@ function draw() {
       }, a0.isPlaying())
       break
     case 'regular_2':
-      set.stateAction(false, () => s2.start(), a1.isPlaying())
+      set.activateAction(false, () => s2.start(), a1.isPlaying())
       break
     case 'regular_3':
-      set.stateAction({
+      set.activateAction({
         soundFile: a3,
         startTime: 1
       }, () => s3.start(), a1.isPlaying())
       break
     case 'regular_4':
-      set.stateAction(false, () => s4.start(), a3.isPlaying())
+      set.activateAction(false, () => s4.start(), a3.isPlaying())
       break
     case 'regular_5':
-      set.stateAction({
+      set.activateAction({
         soundFile: a5,
         startTime: 2
       }, () => s5.start(), a3.isPlaying())
       break
     case 'regular_6':
-      set.stateAction(false, () => s6.start(), a5.isPlaying())
+      set.activateAction(false, () => s6.start(), a5.isPlaying())
       break
     case 'regular_7':
-      set.stateAction({
+      set.activateAction({
         soundFile: a7,
         startTime: 1
       }, () => s7.start(), a5.isPlaying())
       break
     case 'regular_8':
-      set.stateAction(false, false, a7.isPlaying())
+      set.activateAction(false, false, a7.isPlaying())
       break
     case 'regular_final':
-      set.stateAction({
+      set.activateAction({
         soundFile: a10,
         startTime: 3
       }, () => {
+        s10.start()
         s1.stop()
         s2.stop()
         s3.stop()
@@ -243,28 +292,67 @@ function draw() {
       }, a9.isPlaying())
       break
     case 'regular_deactivated':
+      console.log('regular deactivated')
       break
     case 'advanced_0':
+      if (!a10.isPlaying() && !set.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+        d9.play()
+        flags.enteredState[store.currentState] = true
+      }
       break
     case 'advanced_1':
+      set.deactivateAction(d9, function() {
+        ampEnv.triggerAttackRelease("0.3")
+      })
       break
     case 'advanced_2':
+      set.deactivateAction(d7, false, true)
       break
     case 'advanced_3':
+      set.deactivateAction(d7, function() {
+        ampEnv.triggerAttackRelease("0.3")
+      })
       break
     case 'advanced_4':
+      set.deactivateAction(d5, false, true)
       break
     case 'advanced_5':
+      set.deactivateAction(d5, function() {
+        ampEnv.triggerAttackRelease("0.3")
+      })
       break
     case 'advanced_6':
+      set.deactivateAction(d3, false, true)
       break
     case 'advanced_7':
+      set.deactivateAction(d3, function() {
+        ampEnv.triggerAttackRelease("0.3")
+      })
       break
     case 'advanced_8':
+      set.deactivateAction(d1, false, true)
       break
     case 'advanced_final':
+      console.log('advanced final')
       break
     case 'advanced_deactivated':
+      set.deactivateAction(d1, function() {
+        s11.stop()
+        s12.stop()
+        s13.stop()
+        s14.stop()
+        s10.stop()
+        ampEnv.triggerAttackRelease("0.3")
+        osc1.start()
+        osc2.start()
+        osc3.start()
+        d0.play(1)
+        if(!d0.isPlaying){
+          osc1.stop()
+          osc2.stop()
+          osc3.stop()
+        }
+      })
       break
   }
 }
