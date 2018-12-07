@@ -50,65 +50,62 @@ function openSocket() {
 }
 
 function draw() {
+  // console.log(currentStage)
+  currentStage = currentStage.slice(0, -1)
   console.log(currentStage)
 
-  if (currentStage === 'sleeping') {
-    console.log('now sleeping')
-  } else if (currentStage === 'regular_1') {
-    console.log('now regular 1')
+  switch (currentStage) {
+    case 'sleeping':
+      regular_0.play()
+      console.log('sleeping now')
+      break
+    case 'regular_1':
+      regular_1.play()
+      console.log('regular one now')
+      break
+    case 'regular_2':
+      break
+    case 'regular_3':
+      break
+    case 'regular_4':
+      break
+    case 'regular_5':
+      break
+    case 'regular_6':
+      break
+    case 'regular_7':
+      break
+    case 'regular_8':
+      break
+    case 'regular_9':
+      break
+    case 'regular_final':
+      break
+    case 'regular_deactivated':
+      break
+    case 'advanced_0':
+      break
+    case 'advanced_1':
+      break
+    case 'advanced_2':
+      break
+    case 'advanced_3':
+      break
+    case 'advanced_4':
+      break
+    case 'advanced_5':
+      break
+    case 'advanced_6':
+      break
+    case 'advanced_7':
+      break
+    case 'advanced_8':
+      break
+    case 'advanced_final':
+      break
+    case 'advanced_deactivated':
+      break
   }
-  // switch (currentStage) {
-  //   case 'sleeping':
-  //     regular_0.play()
-  //     console.log('sleeping now')
-  //     break
-  //   case 'regular_1':
-  //     regular_1.play()
-  //     console.log('regular one now')
-  //     break
-  //   case 'regular_2':
-  //     break
-  //   case 'regular_3':
-  //     break
-  //   case 'regular_4':
-  //     break
-  //   case 'regular_5':
-  //     break
-  //   case 'regular_6':
-  //     break
-  //   case 'regular_7':
-  //     break
-  //   case 'regular_8':
-  //     break
-  //   case 'regular_9':
-  //     break
-  //   case 'regular_final':
-  //     break
-  //   case 'regular_deactivated':
-  //     break
-  //   case 'advanced_0':
-  //     break
-  //   case 'advanced_1':
-  //     break
-  //   case 'advanced_2':
-  //     break
-  //   case 'advanced_3':
-  //     break
-  //   case 'advanced_4':
-  //     break
-  //   case 'advanced_5':
-  //     break
-  //   case 'advanced_6':
-  //     break
-  //   case 'advanced_7':
-  //     break
-  //   case 'advanced_8':
-  //     break
-  //   case 'advanced_final':
-  //     break
-  //   case 'advanced_deactivated':
-  //     break
-  // }
 }
 /*
 showData(), below, will get called whenever there is new Data
@@ -118,5 +115,4 @@ function showData(result) {
   // when the server returns, show the result in the div:
   currentStage = result.data
   text.html("Sensor reading:" + currentStage)
-  // socket.send('a')
 }
