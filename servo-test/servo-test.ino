@@ -1,5 +1,23 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+#define PIN 7
+#define N_LEDS 60
+
+/*
+   neo pixel settings
+*/
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN);
+//int R = 10;
+int G = 0;
+//int B = 10;
+int s = 1;
+// for blinking
+unsigned long buttonPressedTime;
 
 /*
     global store
@@ -14,11 +32,16 @@ const int advancedFinal_end = 0;
 const int servoStartNum = 11;
 const int btnStartNum = 31;
 
-const int tabletMovingDuration = 3000; // millis
+int incomingByte;
+
+const int tabletMovingDuration = 5000; // millis
 int insertedTabletsNum = 0;
+String currentStage = "sleeping";
+
+/* state flags */
 boolean isRunning = true; // true if user is here
 boolean isActivatingStage = true;
-String currentStage = "sleeping";
+boolean isPlayingSounds = false;
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -35,124 +58,15 @@ void update_insertedTabletsNum(boolean toIncrease) {
 
 /* state actions */
 void moveModule() {
-    if (currentStage == "sleeping") 
-    {
-//      Serial.println("sleeping");
-//      Serial.println(insertedTabletsNum);      
-    } 
-    else if (currentStage == "regular_1") 
-    {
-//      Serial.println("regular_1");
-//      Serial.println(insertedTabletsNum);      
-    } 
-    else if (currentStage == "regular_2") 
-    {
-//      Serial.println("regular_2");
-//      Serial.println(insertedTabletsNum);      
-    } 
-    else if (currentStage == "regular_3") 
-    {
-//      Serial.println("regular_3");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_4") 
-    {
-//      Serial.println("regular_4");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_5") 
-    {
-//      Serial.println("regular_5");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_6") 
-    {
-//      Serial.println("regular_6");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_7") 
-    {
-//      Serial.println("regular_7");
-//      Serial.println(insertedTabletsNum);      
-    }
-    else if (currentStage == "regular_8") 
-    {
-//      Serial.println("regular_8");
-//      Serial.println(insertedTabletsNum);      
-    }                        
-    else if (currentStage == "regular_9") 
-    {
-//      Serial.println("regular_9");
-//      Serial.println(insertedTabletsNum);      
-    }                          
-    else if (currentStage == "regular_final") 
-    {
-//      Serial.println("regular_final");
-//      Serial.println(insertedTabletsNum);      
-    }                              
-    else if (currentStage == "regular_deactivated") 
-    {
-//      Serial.println("regular_deactivated");
-//      Serial.println(insertedTabletsNum);      
-      isRunning = false;      
-    } 
-    else if (currentStage == "advanced_0") 
-    {
-//      Serial.println("advanced_0");
-//      Serial.println(insertedTabletsNum);        
-    }       
-    else if (currentStage == "advanced_1") 
-    {
-//      Serial.println("advanced_1");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_2") 
-    {
-//      Serial.println("advanced_2");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_3") 
-    {
-//      Serial.println("advanced_3");
-//      Serial.println(insertedTabletsNum);        
-    }       
-    else if (currentStage == "advanced_4") 
-    {
-//      Serial.println("advanced_4");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_5") 
-    {
-//      Serial.println("advanced_5");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_6") 
-    {
-//      Serial.println("advanced_6");
-//      Serial.println(insertedTabletsNum);        
-    }       
-    else if (currentStage == "advanced_7") 
-    {
-//      Serial.println("advanced_7");
-//      Serial.println(insertedTabletsNum);        
-    }    
-    else if (currentStage == "advanced_8") 
-    {
-//      Serial.println("advanced_8");
-//      Serial.println(insertedTabletsNum);        
-    }  
-    else if (currentStage == "advanced_final") 
-    {
-//      Serial.println("advanced_final");
-//      Serial.println(insertedTabletsNum);        
-    }     
-    else if (currentStage == "advanced_deactivated") 
-    {
-//      Serial.println("advanced_deactivated");
-//      Serial.println(insertedTabletsNum);   
-      isRunning = false;
-      currentStage = "sleeping";             
-    }                                                                               
+  if (currentStage == "regular_deactivated")
+  {
+    isRunning = false;
+  }
+  else if (currentStage == "advanced_deactivated")
+  {
+    isRunning = false;
+    currentStage = "sleeping";
+  }
 }
 
 /* state machine */
@@ -200,7 +114,7 @@ void update_stage() {
             break;
         }
         moveModule();
-        
+
       } else {
         // enter condition switching
         switch (insertedTabletsNum) {
@@ -210,7 +124,6 @@ void update_stage() {
             break;
           case regularFinal_enter:
             currentStage = "regular_final";
-            delay(500);
             isActivatingStage = false;
             break;
         }
@@ -252,7 +165,7 @@ void update_stage() {
           currentStage = "advanced_deactivated";
           break;
       }
-      
+
       moveModule();
     }
   } else {
@@ -271,7 +184,8 @@ class ModuleSet {
     ModuleSet(Servo servo, int btnPin);
     void updateBtnState();
     void moveTablet();
-    
+    void updateNeopixels();
+
     int _servoPin;
     int _btnPin;
     Servo _servo;
@@ -307,8 +221,25 @@ ModuleSet::ModuleSet(Servo servo, int btnPin) {
 };
 
 void ModuleSet::updateBtnState() {
+  // lock or unlock btn before doing anything
+  if (isPlayingSounds) {
+    // but only before activating final stage
+    if (isActivatingStage) {
+      btnIsLocked = true;
+    // or only one deactivation module left
+    } else if (!isActivatingStage && insertedTabletsNum == 1) {
+      btnIsLocked = true;
+    // or only when all modules are inserted
+    } else if (insertedTabletsNum == 10) {
+      btnIsLocked = true;
+    }    
+  } else {
+    // reverse btn locked state after sound ends
+    if (!btnIsOn) btnIsLocked = false;
+  }
+  
   _btnRead = digitalRead(_btnPin);
-  boolean debouncePassed = (_btnRead == HIGH && _btnWasOn == LOW && millis() - _time > tabletMovingDuration);
+  boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
   // update module locked status in deactivation stage
@@ -354,9 +285,6 @@ void ModuleSet::updateBtnState() {
   // btn is not locked, switch btn state
   if (readyToToggle) {
 
-//    Serial.println(_btnRead);
-//    Serial.println(_btnPin);
-
     // toggle btn state
     if (btnIsOn == HIGH) btnIsOn = LOW;
     else btnIsOn = HIGH;
@@ -374,6 +302,7 @@ void ModuleSet::updateBtnState() {
         if (enterLastTablet) insertedTabletsNum = modulesNum;
         else insertedTabletsNum -= 1;
       }
+      
     } else {
       switch (insertedTabletsNum) {
         case modulesNum:
@@ -414,14 +343,18 @@ void ModuleSet::updateBtnState() {
 
     // btn is not locked, move servo
     if (!btnIsLocked) {
-      if (btnIsOn)
+      if (btnIsOn) {
         _servo.write(180);
-      else
+        delay(1);        
+      }
+      else {
         _servo.write(0);
+        delay(1);        
+      }
     }
 
     // btn is locked, but check if it should be unlocked or not
-    if (debouncePassed) {
+    if (debouncePassed && !isPlayingSounds) {
       if (isActivatingStage) {
         if (currentStage != "regular_final")
           btnIsLocked = true;
@@ -554,12 +487,19 @@ void setup() {
   pinMode(btnPin_8, INPUT);
   pinMode(btnPin_9, INPUT);
   pinMode(btnPin_10, INPUT);
+
+  // neo pixels
+  strip.begin();
+  strip.show();
+
+//  // record time when button pressed
+//  buttonPressedTime = millis();
 }
 
 /*
    loop
 */
-void loop() {
+void loop() {  
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
@@ -571,6 +511,14 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
-  Serial.println(currentStage); 
-//  Serial.println(currentStage);
+  Serial.println(currentStage);
+
+  if (Serial.available() > 0) {  
+     incomingByte = Serial.read(); 
+     if (incomingByte == 'H') { 
+        isPlayingSounds = true;
+     } else {
+        isPlayingSounds = false;       
+     }
+   }    
 }
