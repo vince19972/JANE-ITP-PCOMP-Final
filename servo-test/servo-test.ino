@@ -34,11 +34,14 @@ const int btnStartNum = 31;
 
 int incomingByte;
 
-const int tabletMovingDuration = 3000; // millis
+const int tabletMovingDuration = 5000; // millis
 int insertedTabletsNum = 0;
+String currentStage = "sleeping";
+
+/* state flags */
 boolean isRunning = true; // true if user is here
 boolean isActivatingStage = true;
-String currentStage = "sleeping";
+boolean isPlayingSounds = false;
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -218,8 +221,25 @@ ModuleSet::ModuleSet(Servo servo, int btnPin) {
 };
 
 void ModuleSet::updateBtnState() {
+  // lock or unlock btn before doing anything
+  if (isPlayingSounds) {
+    // but only before activating final stage
+    if (isActivatingStage) {
+      btnIsLocked = true;
+    // or only one deactivation module left
+    } else if (!isActivatingStage && insertedTabletsNum == 1) {
+      btnIsLocked = true;
+    // or only when all modules are inserted
+    } else if (insertedTabletsNum == 10) {
+      btnIsLocked = true;
+    }    
+  } else {
+    // reverse btn locked state after sound ends
+    if (!btnIsOn) btnIsLocked = false;
+  }
+  
   _btnRead = digitalRead(_btnPin);
-  boolean debouncePassed = (_btnRead == HIGH && _btnWasOn == LOW && millis() - _time > tabletMovingDuration);
+  boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
   // update module locked status in deactivation stage
@@ -271,7 +291,6 @@ void ModuleSet::updateBtnState() {
 
     // update inserted tablets number
     if (isActivatingStage) {
-      Serial.println(_btnPin);
       if (currentStage != "regular_final") {
         update_insertedTabletsNum(true);
       } else {
@@ -326,16 +345,16 @@ void ModuleSet::updateBtnState() {
     if (!btnIsLocked) {
       if (btnIsOn) {
         _servo.write(180);
-        delay(10);        
+        delay(1);        
       }
       else {
         _servo.write(0);
-        delay(10);        
+        delay(1);        
       }
     }
 
     // btn is locked, but check if it should be unlocked or not
-    if (debouncePassed) {
+    if (debouncePassed && !isPlayingSounds) {
       if (isActivatingStage) {
         if (currentStage != "regular_final")
           btnIsLocked = true;
@@ -497,20 +516,9 @@ void loop() {
   if (Serial.available() > 0) {  
      incomingByte = Serial.read(); 
      if (incomingByte == 'H') { 
-        for (int i = 0; i < 6; i++) {
-          strip.setPixelColor(i, 255, 255, 255);
-        }
-        strip.show(); 
-     } else if (incomingByte == 'B') {
-        for (int i = 0; i < 6; i++) {
-          strip.setPixelColor(i, 255, 0, 0);
-        }
-        strip.show();         
+        isPlayingSounds = true;
      } else {
-        for (int i = 0; i < 6; i++) {
-          strip.setPixelColor(i, 0, 0, 255);
-        }
-        strip.show();          
+        isPlayingSounds = false;       
      }
    }    
 }
