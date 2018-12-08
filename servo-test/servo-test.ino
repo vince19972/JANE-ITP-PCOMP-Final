@@ -32,6 +32,8 @@ const int advancedFinal_end = 0;
 const int servoStartNum = 11;
 const int btnStartNum = 31;
 
+int incomingByte;
+
 const int tabletMovingDuration = 3000; // millis
 int insertedTabletsNum = 0;
 boolean isRunning = true; // true if user is here
@@ -215,14 +217,6 @@ ModuleSet::ModuleSet(Servo servo, int btnPin) {
   _btnPin = btnPin;
 };
 
-void ModuleSet::updateNeopixels() {
-  int range = (_btnPin % 10) * 6;
-  Serial.println("test");
-  if (isActivatingStage) {
-    neo_green(range);
-  }
-}
-
 void ModuleSet::updateBtnState() {
   _btnRead = digitalRead(_btnPin);
   boolean debouncePassed = (_btnRead == HIGH && _btnWasOn == LOW && millis() - _time > tabletMovingDuration);
@@ -330,10 +324,14 @@ void ModuleSet::updateBtnState() {
 
     // btn is not locked, move servo
     if (!btnIsLocked) {
-      if (btnIsOn)
+      if (btnIsOn) {
         _servo.write(180);
-      else
+        delay(10);        
+      }
+      else {
         _servo.write(0);
+        delay(10);        
+      }
     }
 
     // btn is locked, but check if it should be unlocked or not
@@ -472,13 +470,17 @@ void setup() {
   pinMode(btnPin_10, INPUT);
 
   // neo pixels
-  initNeoPixels();
+  strip.begin();
+  strip.show();
+
+//  // record time when button pressed
+//  buttonPressedTime = millis();
 }
 
 /*
    loop
 */
-void loop() {
+void loop() {  
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
@@ -491,94 +493,24 @@ void loop() {
   ModuleSet_10.moveTablet();
 
   Serial.println(currentStage);
-}
 
-
-/*
-** neo pixels functions
-*/
-
-void neo_allWhite() {
-  for (int i = 0; i < 60; i++) {
-    strip.setPixelColor(i, 255, 255, 255);
-  }
-  strip.show();  
-}
-
-void neo_green(int range) {
-  // blink for 0.7s when module moving  
-  for (int i = range - 5; i <= range; i++) {
-    strip.setPixelColor(i, 0, G, 0);
-  }
-  strip.show();
-}
-
-void initNeoPixels() {
-  strip.begin();
-  strip.show();
-
-  // record time when button pressed
-  buttonPressedTime = millis();
-}
-
-void rainbow(uint8_t wait) {
-  uint16_t i, j;
-
-  for (j = 0; j < 256; j++) {
-    for (i = 0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel((i + j) & 255));
-    }
-    strip.show();
-//    delay(wait);
-  }
-}
-
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j = 0; j < 10; j++) { //do 10 cycles of chasing
-    for (int q = 0; q < 3; q++) {
-      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, c);  //turn every third pixel on
-      }
-      strip.show();
-
-//      delay(wait);
-
-      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, 0);      //turn every third pixel off
-      }
-    }
-  }
-}
-
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
-    for (int q = 0; q < 3; q++) {
-      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
-        //        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-        strip.setPixelColor(i + q, 255 - (i + j) % 255 * 3, 0, (i + j) % 255 * 3); //turn every third pixel on
-      }
-      strip.show();
-
-//      delay(wait);
-
-      for (uint16_t i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, 0);      //turn every third pixel off
-      }
-    }
-  }
-}
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if (WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if (WheelPos < 170) {
-    WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  if (Serial.available() > 0) {  
+     incomingByte = Serial.read(); 
+     if (incomingByte == 'H') { 
+        for (int i = 0; i < 6; i++) {
+          strip.setPixelColor(i, 255, 255, 255);
+        }
+        strip.show(); 
+     } else if (incomingByte == 'B') {
+        for (int i = 0; i < 6; i++) {
+          strip.setPixelColor(i, 255, 0, 0);
+        }
+        strip.show();         
+     } else {
+        for (int i = 0; i < 6; i++) {
+          strip.setPixelColor(i, 0, 0, 255);
+        }
+        strip.show();          
+     }
+   }    
 }
