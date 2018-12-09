@@ -1,29 +1,56 @@
-#include <Wire.h>
+/*
+** libraries and init settings
+*/
 
-int LED = 13;
-int x = 0;
+// I2C
+#include <Wire.h>
+int busData = 0;
+
+// neo pixels
+#include <Adafruit_NeoPixel.h>   // including the Adafruit library
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+#define PIN 13
+#define N_LEDS 60    
+
+/*
+** variables and stores
+*/
+
+// neo pixels
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN);
+int G = 0;
+int s = 1;
+unsigned long buttonPressedTime;
+
 void setup() {
-  // Define the LED pin as Output
-  pinMode (LED, OUTPUT);
-  // Start the I2C Bus as Slave on address 9
+  /* I2C */
   Wire.begin(9); 
-  // Attach a function to trigger when something is received.
   Wire.onReceive(receiveEvent);
+
+  /* serial */
+  Serial.begin(9600);
+    
+  /* neo pixels */
+  // init 
+  strip.begin();
+  strip.show();
+
+  // record time when button pressed
+  buttonPressedTime = millis(); 
+
+  pinMode(PIN, OUTPUT);
 }
+
 void receiveEvent(int bytes) {
-  x = Wire.read();    // read one character from the I2C
+  busData = Wire.read();
+  Serial.println(busData);
 }
-void loop() {
-  //If value received is 0 blink LED for 200 ms
-  if (x % 2 == '0') {
-    digitalWrite(LED, HIGH);
-    delay(200);
-    digitalWrite(LED, LOW);
-    delay(200);
-  } else {
-    digitalWrite(LED, HIGH);
-    delay(400);
-    digitalWrite(LED, LOW);
-    delay(400);    
+
+void loop() {  
+  Serial.println(busData);  
+  if (busData % 2 == '0') {
+    digitalWrite(PIN, HIGH);
   }
 }
