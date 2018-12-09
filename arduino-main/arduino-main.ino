@@ -1,5 +1,7 @@
-//#include <Servo.h>
+#include <known_16bit_timers.h>
 #include <Adafruit_TiCoServo.h>
+
+//#include <Servo.h>
 #include <SoftwareSerial.h>
 
 // neo pixels
@@ -386,12 +388,12 @@ void ModuleSet::moveTablet() {
 //Servo servo_1;
 //const int servo_1_pin = servoStartNum + 0;
 Adafruit_TiCoServo servo_1;
-const int servo_1_pin = 11;
+const int servo_1_pin = 2;
 
 //Servo servo_2;
 //const int servo_2_pin = servoStartNum + 1;
 Adafruit_TiCoServo servo_2;
-const int servo_2_pin = 12;
+const int servo_2_pin = 11;
 
 //Servo servo_3;
 //const int servo_3_pin = servoStartNum + 2;
@@ -486,25 +488,25 @@ void setup() {
 
   // init servos
   servo_1.attach(servo_1_pin);
-  servo_1.write(0);
+  servo_1.write(90);
   servo_2.attach(servo_2_pin);
-  servo_2.write(0);
+  servo_2.write(180);
   servo_3.attach(servo_3_pin);
-  servo_3.write(0);
-  servo_4.attach(servo_4_pin);
-  servo_4.write(0);
-  servo_5.attach(servo_5_pin);
-  servo_5.write(0);
-  servo_6.attach(servo_6_pin);
-  servo_6.write(0);
-  servo_7.attach(servo_7_pin);
-  servo_7.write(0);
-  servo_8.attach(servo_8_pin);
-  servo_8.write(0);
-  servo_9.attach(servo_9_pin);
-  servo_9.write(0);
-  servo_10.attach(servo_10_pin);
-  servo_10.write(0);
+  servo_3.write(90);
+//  servo_4.attach(servo_4_pin);
+//  servo_4.write(0);
+//  servo_5.attach(servo_5_pin);
+//  servo_5.write(0);
+//  servo_6.attach(servo_6_pin);
+//  servo_6.write(0);
+//  servo_7.attach(servo_7_pin);
+//  servo_7.write(0);
+//  servo_8.attach(servo_8_pin);
+//  servo_8.write(0);
+//  servo_9.attach(servo_9_pin);
+//  servo_9.write(0);
+//  servo_10.attach(servo_10_pin);
+//  servo_10.write(0);
 
   // init btns
   pinMode(btnPin_1, INPUT);
@@ -520,8 +522,8 @@ void setup() {
 
   /* neo pixels */
   // init 
-  strip.begin();
-  strip.show();
+//  strip.begin();
+//  strip.show();
 }
 
 /*
@@ -532,13 +534,13 @@ void loop() {
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
-  ModuleSet_4.moveTablet();
-  ModuleSet_5.moveTablet();
-  ModuleSet_6.moveTablet();
-  ModuleSet_7.moveTablet();
-  ModuleSet_8.moveTablet();
-  ModuleSet_9.moveTablet();
-  ModuleSet_10.moveTablet();
+//  ModuleSet_4.moveTablet();
+//  ModuleSet_5.moveTablet();
+//  ModuleSet_6.moveTablet();
+//  ModuleSet_7.moveTablet();
+//  ModuleSet_8.moveTablet();
+//  ModuleSet_9.moveTablet();
+//  ModuleSet_10.moveTablet();
 
   // neo pixels
 //  for (int i = 0; i < 60; i++) {
@@ -548,12 +550,12 @@ void loop() {
 
   // sending data to p5
   Serial.println(currentStage);  
-  if (Serial.available() > 0) {  
-     incomingByte = Serial.read(); 
-     if (incomingByte == 'H') { 
-        isPlayingSounds = true;
-     } else {
-        isPlayingSounds = false;       
-     }
-   }
+//  if (Serial.available() > 0) {  
+//     incomingByte = Serial.read(); 
+//     if (incomingByte == 'H') { 
+//        isPlayingSounds = true;
+//     } else {
+//        isPlayingSounds = false;       
+//     }
+//   }
 }
