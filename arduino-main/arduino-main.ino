@@ -1,23 +1,6 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
-#include <Adafruit_NeoPixel.h>
-#ifdef __AVR__
-  #include <avr/power.h>
-#endif
-#define PIN 7
-#define N_LEDS 60
-
-/*
-   neo pixel settings
-*/
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN);
-//int R = 10;
-int G = 0;
-//int B = 10;
-int s = 1;
-// for blinking
-unsigned long buttonPressedTime;
+#include <Wire.h>
 
 /*
     global store
@@ -42,6 +25,9 @@ String currentStage = "sleeping";
 boolean isRunning = true; // true if user is here
 boolean isActivatingStage = true;
 boolean isPlayingSounds = false;
+
+/* I2C bus */
+byte busData = 0;
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -488,18 +474,15 @@ void setup() {
   pinMode(btnPin_9, INPUT);
   pinMode(btnPin_10, INPUT);
 
-  // neo pixels
-  strip.begin();
-  strip.show();
-
-//  // record time when button pressed
-//  buttonPressedTime = millis();
+  // I2C master bus
+  Wire.begin();   
 }
 
 /*
    loop
 */
 void loop() {  
+  // modules actions
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
@@ -513,6 +496,7 @@ void loop() {
 
   Serial.println(currentStage);
 
+  // sending data to p5
   if (Serial.available() > 0) {  
      incomingByte = Serial.read(); 
      if (incomingByte == 'H') { 
@@ -520,5 +504,12 @@ void loop() {
      } else {
         isPlayingSounds = false;       
      }
-   }    
+   }
+
+  // I2C bus communication
+  Wire.beginTransmission(9); 
+  Wire.write(busData);             
+  Wire.endTransmission();
+  busData++; 
+  delay(500);
 }
