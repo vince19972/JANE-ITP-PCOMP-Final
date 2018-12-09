@@ -1,6 +1,14 @@
-#include <Servo.h>
+//#include <Servo.h>
+#include <Adafruit_TiCoServo.h>
 #include <SoftwareSerial.h>
-#include <Wire.h>
+
+// neo pixels
+#include <Adafruit_NeoPixel.h>   // including the Adafruit library
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+#define PIN 7
+#define N_LEDS 60    
 
 /*
     global store
@@ -13,7 +21,9 @@ const int regularFinal_enter = modulesNum;
 const int advancedFinal_end = 0;
 
 const int servoStartNum = 11;
+const int servoPins [10] = {2, 3, 5, 6, 7, 8, 11, 12, 13, 44};
 const int btnStartNum = 31;
+
 
 int incomingByte;
 
@@ -21,13 +31,16 @@ const int tabletMovingDuration = 5000; // millis
 int insertedTabletsNum = 0;
 String currentStage = "sleeping";
 
+// neo pixels
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN);
+int G = 0;
+int s = 1;
+unsigned long buttonPressedTime;
+
 /* state flags */
 boolean isRunning = true; // true if user is here
 boolean isActivatingStage = true;
 boolean isPlayingSounds = false;
-
-/* I2C bus */
-byte busData = 0;
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -167,14 +180,16 @@ void update_stage() {
 */
 class ModuleSet {
   public:
-    ModuleSet(Servo servo, int btnPin);
+//    ModuleSet(Servo servo, int btnPin);
+    ModuleSet(Adafruit_TiCoServo servo, int btnPin);
     void updateBtnState();
     void moveTablet();
     void updateNeopixels();
 
     int _servoPin;
     int _btnPin;
-    Servo _servo;
+//    Servo _servo;
+    Adafruit_TiCoServo _servo;
     boolean btnIsOn = false;
     boolean btnIsLocked = false;
   private:
@@ -201,7 +216,7 @@ class ModuleSet {
 
 };
 
-ModuleSet::ModuleSet(Servo servo, int btnPin) {
+ModuleSet::ModuleSet(Adafruit_TiCoServo servo, int btnPin) {
   _servo = servo;
   _btnPin = btnPin;
 };
@@ -368,26 +383,55 @@ void ModuleSet::moveTablet() {
 */
 
 /* servos */
-Servo servo_1;
-const int servo_1_pin = servoStartNum + 0;
-Servo servo_2;
-const int servo_2_pin = servoStartNum + 1;
-Servo servo_3;
-const int servo_3_pin = servoStartNum + 2;
-Servo servo_4;
-const int servo_4_pin = servoStartNum + 3;
-Servo servo_5;
-const int servo_5_pin = servoStartNum + 4;
-Servo servo_6;
-const int servo_6_pin = servoStartNum + 5;
-Servo servo_7;
-const int servo_7_pin = servoStartNum + 6;
-Servo servo_8;
-const int servo_8_pin = servoStartNum + 7;
-Servo servo_9;
-const int servo_9_pin = servoStartNum + 8;
-Servo servo_10;
-const int servo_10_pin = servoStartNum + 9;
+//Servo servo_1;
+//const int servo_1_pin = servoStartNum + 0;
+Adafruit_TiCoServo servo_1;
+const int servo_1_pin = 11;
+
+//Servo servo_2;
+//const int servo_2_pin = servoStartNum + 1;
+Adafruit_TiCoServo servo_2;
+const int servo_2_pin = 12;
+
+//Servo servo_3;
+//const int servo_3_pin = servoStartNum + 2;
+Adafruit_TiCoServo servo_3;
+const int servo_3_pin = 13;
+
+//Servo servo_4;
+//const int servo_4_pin = servoStartNum + 3;
+Adafruit_TiCoServo servo_4;
+const int servo_4_pin = servoPins[3];
+
+//Servo servo_5;
+//const int servo_5_pin = servoStartNum + 4;
+Adafruit_TiCoServo servo_5;
+const int servo_5_pin = servoPins[4];
+
+//Servo servo_6;
+//const int servo_6_pin = servoStartNum + 5;
+Adafruit_TiCoServo servo_6;
+const int servo_6_pin = servoPins[5];
+
+//Servo servo_7;
+//const int servo_7_pin = servoStartNum + 6;
+Adafruit_TiCoServo servo_7;
+const int servo_7_pin = servoPins[6];
+
+//Servo servo_8;
+//const int servo_8_pin = servoStartNum + 7;
+Adafruit_TiCoServo servo_8;
+const int servo_8_pin = servoPins[7];
+
+//Servo servo_9;
+//const int servo_9_pin = servoStartNum + 8;
+Adafruit_TiCoServo servo_9;
+const int servo_9_pin = servoPins[8];
+
+//Servo servo_10;
+//const int servo_10_pin = servoStartNum + 9;
+Adafruit_TiCoServo servo_10;
+const int servo_10_pin = servoPins[9];
 
 /* btns */
 const int btnPin_1 = btnStartNum + 0;
@@ -474,8 +518,10 @@ void setup() {
   pinMode(btnPin_9, INPUT);
   pinMode(btnPin_10, INPUT);
 
-  // I2C master bus
-  Wire.begin();   
+  /* neo pixels */
+  // init 
+  strip.begin();
+  strip.show();
 }
 
 /*
@@ -494,9 +540,14 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
-  Serial.println(currentStage);
+  // neo pixels
+//  for (int i = 0; i < 60; i++) {
+//    strip.setPixelColor(i, 255, 255, 255);
+//  }
+//  strip.show();  
 
   // sending data to p5
+  Serial.println(currentStage);  
   if (Serial.available() > 0) {  
      incomingByte = Serial.read(); 
      if (incomingByte == 'H') { 
@@ -505,11 +556,4 @@ void loop() {
         isPlayingSounds = false;       
      }
    }
-
-  // I2C bus communication
-  Wire.beginTransmission(9); 
-  Wire.write(busData);             
-  Wire.endTransmission();
-  busData++; 
-  delay(500);
 }
