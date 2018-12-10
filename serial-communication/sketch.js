@@ -3,14 +3,17 @@
 */
 
 var serial
-var portName = '/dev/cu.usbmodem141101'
+var portName = '/dev/cu.usbmodem146101'
 
 var store = {
   currentState: 'sleeping',
   prevSoundFile: '',
   counter: 0,
   lastTime: 0,
-  currentTime: 0,
+  uploadLastTime: 0,
+  showSequence: false,
+  seqLastTime: 0, //for blinking deactivating sequence
+  seqLit: false
 }
 var flags = {
   isPlayingSound: false,
@@ -25,16 +28,7 @@ var flags = {
     regular_7: false,
     regular_8: false,
     regular_9: false,
-    regular_final: false,
-    advanced_1: false,
-    advanced_2: false,
-    advanced_3: false,
-    advanced_4: false,
-    advanced_5: false,
-    advanced_6: false,
-    advanced_7: false,
-    advanced_8: false,
-    advanced_9: false,
+    advanced_0: false,
   }
 }
 
@@ -43,29 +37,38 @@ var setter = {
     return data.slice(0, -1)
   },
   activateAction(soundFileObj, toneCallback = false, prevIsPlaying = true) {
-    console.log(store.currentState)
     if (!flags.isPlayingSound && !prevIsPlaying && !flags.enteredState[store.currentState]) {
       // default p5 soundfile play
       if (soundFileObj) {
-        console.log(soundFileObj)
-        var {soundFile, startTime} = soundFileObj
+        // update isPlaying flag
+        flags.isPlayingSound = true
+
+        // play sound
+        var { soundFile, startTime } = soundFileObj
         if (startTime)
           soundFile.play(startTime)
         else
           soundFile.play()
 
         // update isPlaying flag
-        update.isPlaying(true)
-        soundFile.onended(function() {
-          update.isPlaying(false)
+        soundFile.onended(function () {
+          flags.isPlayingSound = false
         })
       }
 
       // tone.js callback
       if (toneCallback) toneCallback()
     } else {
-      update.isPlaying(false)
+      flags.isPlayingSound = false
     }
+
+    if (!flags.enteredState[store.currentState]) {
+      store.lastTime = millis()
+      if (store.currentState == 'advanced_0') {
+        store.uploadLastTime = millis()
+      }
+    }
+
     // update entered state of each module
     flags.enteredState[store.currentState] = true
 
@@ -73,15 +76,13 @@ var setter = {
     setter.sendSerialData()
   },
   deactivateAction(soundFile = false, toneCallback = false, isToPlay = false) {
-    console.log(store.currentState)
-    console.log(flags.enteredState[store.currentState])
-    if(!setter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+    if (!getter.actDeactVoiceIsPlaying() && !getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
       if (isToPlay) {
         soundFile.play()
       } else {
-        if(soundFile.isPlaying()) {
-          if (soundFile) soundFile.stop()
+        if (soundFile.isPlaying()) {
           if (toneCallback) toneCallback()
+          if (soundFile) soundFile.stop()
         }
       }
     }
@@ -91,29 +92,34 @@ var setter = {
     // send data back to Arduino
     setter.sendSerialData()
   },
-  startUploadingTimer() {
-    if (millis() - store.lastTime > 7000 && store.counter < uploadingVoice.length) {
-      console.log("uploading in progess")
-      uploadingVoice[counter].play()
-      if (store.counter < uploadingSound.length) {
-        uploadingSound[counter].start()
-      }
-      store.counter++
-      store.lastTime = millis()
-    } else if (d9.isPlaying() || d7.isPlaying() || d5.isPlaying() || d3.isPlaying() || d1.isPlaying()) {
-      store.lastTime = millis()
+  startUrgingTimer() {
+    console.log("urging timer starts");
+    // console.log(millis() - store.lastTime);
+    if (millis() - store.lastTime > 5000) {
+      urg1.play();
+      store.lastTime = millis();
+    } else if (a1.isPlaying() || a3.isPlaying() || a5.isPlaying() || a7.isPlaying() || a9.isPlaying() || a10.isPlaying()) {
+      store.lastTime = millis();
     }
   },
-  uploadingVoiceIsPlaying() {
-    let numOfUploadingVoices = uploadingVoice.filter(_voice => _voice.isPlaying() == true).length
-    if (numOfUploadingVoices == 1) {
-      return true
-    } else if (numOfUploadingVoices == 0) {
-      return false
+  startUploadingTimer() {
+    if (millis() - store.uploadLastTime > 7000 && store.counter < uploadingVoice.length) {
+      console.log(millis() - store.uploadLastTime);
+      console.log("uploading in progess")
+      s10.stop()
+      uploadingVoice[store.counter].play()
+      if (store.counter < uploadingSound.length) {
+        uploadingSound[store.counter].start()
+      }
+      store.counter++
+      store.uploadLastTime = millis()
+    } else if (d9.isPlaying() || d7.isPlaying() || d5.isPlaying() || d3.isPlaying() || d1.isPlaying()) {
+      store.uploadLastTime = millis()
     }
   },
   sendSerialData() {
-    const isPlaying = getter.actDeactVoiceIsPlaying()
+    const isPlaying = getter.actDeactVoiceIsPlaying() || getter.uploadingVoiceIsPlaying() || flags.isPlayingSound
+    console.log(isPlaying)
     if (isPlaying) serial.write(72)
     else serial.write(66)
   }
@@ -122,7 +128,11 @@ var setter = {
 var getter = {
   actDeactVoiceIsPlaying() {
     let numOfActDeactVoices = actDeactVoice.filter(_voice => _voice.isPlaying()).length
-    return numOfActDeactVoices === 1 ? 1 : 0
+    return numOfActDeactVoices >= 1
+  },
+  uploadingVoiceIsPlaying() {
+    let numOfUploadingVoices = uploadingVoice.filter(_voice => _voice.isPlaying()).length
+    return numOfUploadingVoices >= 1
   }
 }
 
@@ -141,7 +151,7 @@ var update = {
 */
 //-- p5 sounds --//
 // activation stage + urging voice
-let a1, a3, a5, a7, a9, a10, urg1, urg2
+let a1, a3, a5, a7, a9, a10, urg1, urg2, exit
 // uploading stage voice array
 let uploadingVoice = []
 // uploading stage voice
@@ -152,6 +162,8 @@ let uploadingSound = []
 let d1, d3, d5, d7, d9, d0
 // voices collection
 let actDeactVoice = []
+
+let lastState;
 
 //-- tone.js --//
 // activation
@@ -176,9 +188,9 @@ s6.loop = true
 let s7 = new Tone.Player('./sounds/SoundTest/activation/drone loop.mp3').toMaster()
 s7.volume.value = -20
 s7.loop = true
-let s10 = new Tone.Player('./sounds/SoundTest/activation/upload.mp3').toMaster()
-s10.volume.value = -20
-s10.loop = true
+var s10 = new Tone.Player("./sounds/SoundTest/activation/tension synths.mp3").toMaster();
+s10.volume.value = -5;
+s10.loop = true;
 
 //deactivation:
 ampEnv = new Tone.AmplitudeEnvelope({
@@ -191,16 +203,19 @@ ampEnv = new Tone.AmplitudeEnvelope({
 //noise for interrupting uploading
 var noise = new Tone.Noise('white').connect(ampEnv).start()
 
-var s11 = new Tone.Player('./sounds/SoundTest/deactivation/analog extreme.mp3').toMaster()
-s11.volume.value = -10
-s11.loop = true
-var s12 = new Tone.Player('./sounds/SoundTest/deactivation/mri1.mp3').toMaster()
+//pulse sound
+var autoFilter2 = new Tone.AutoFilter("8n").toMaster().start();
+var autoFilter1 = new Tone.AutoFilter("4n").toMaster().start();
+var s11 = new Tone.Oscillator(300, "triangle").connect(autoFilter1).connect(autoFilter2).toMaster();
+s11.volume.value = -25;
+
+var s12 = new Tone.Player('./sounds/SoundTest/deactivation/upload.mp3').toMaster()
 s12.volume.value = -10
 s12.loop = true
-var s13 = new Tone.Player('./sounds/SoundTest/deactivation/mri2.mp3').toMaster()
+var s13 = new Tone.Player('./sounds/SoundTest/deactivation/analog extreme.mp3').toMaster()
 s13.volume.value = -10
 s13.loop = true
-var s14 = new Tone.Player('./sounds/SoundTest/deactivation/tension synths.mp3').toMaster()
+var s14 = new Tone.Player('./sounds/SoundTest/deactivation/mri2.mp3').toMaster()
 s14.volume.value = -10
 s14.loop = true
 var osc1 = new Tone.Oscillator(300, 'square').toMaster()
@@ -215,35 +230,58 @@ osc3.volume.value = -30
 */
 
 function preload() {
+  //activating voice:
+  a0 = loadSound("./sounds/ActivationV3/a0.mp3")
+  a1 = loadSound("./sounds/ActivationV3/a1.mp3")
+  a3 = loadSound("./sounds/ActivationV3/a3.mp3")
+  a5 = loadSound("./sounds/ActivationV3/a5.mp3")
+  a7 = loadSound("./sounds/ActivationV3/a7.mp3")
+  a9 = loadSound("./sounds/ActivationV3/a9.mp3")
+  a10 = loadSound("./sounds/ActivationV3/a10.mp3")
+  exit = loadSound('./sounds/ActivationV3/exit.mp3')
+  urg1 = loadSound("./sounds/ActivationV3/urging 1.mp3")
+  urg2 = loadSound("./sounds/ActivationV3/urging 2.mp3")
+
+  //deactivating voice
+  d9 = loadSound("./sounds/Deactivation/d9.mp3")
+  d7 = loadSound("./sounds/Deactivation/d7.mp3")
+  d5 = loadSound("./sounds/Deactivation/d5.mp3")
+  d3 = loadSound("./sounds/Deactivation/d3.mp3")
+  d1 = loadSound("./sounds/Deactivation/d1.mp3")
+  d0 = loadSound("./sounds/Deactivation/d0.mp3")
+
   // uploading voices files
-  u1  = loadSound('./sounds/Uploading/1initialize.mp3')
-  u2  = loadSound('./sounds/Uploading/2scanning.mp3')
-  u3  = loadSound('./sounds/Uploading/3mapping.mp3')
-  u4  = loadSound('./sounds/Uploading/4reestablishing.mp3')
-  u5  = loadSound('./sounds/Uploading/5uploading.mp3')
-  u6  = loadSound('./sounds/Uploading/Congratulations.mp3')
+  u1 = loadSound('./sounds/Uploading/1initialize.mp3')
+  u2 = loadSound('./sounds/Uploading/2scanning.mp3')
+  u3 = loadSound('./sounds/Uploading/3mapping.mp3')
+  u4 = loadSound('./sounds/Uploading/4reestablishing.mp3')
+  u5 = loadSound('./sounds/Uploading/5uploading.mp3')
+  u6 = loadSound('./sounds/Uploading/Congratulations.mp3')
 
   // testing voice files
-  a0  = loadSound('./sounds/ActivationTest/a0.mp3')
-  a1  = loadSound('./sounds/ActivationTest/a1.mp3')
-  a3  = loadSound('./sounds/ActivationTest/a3.mp3')
-  a5  = loadSound('./sounds/ActivationTest/a5.mp3')
-  a7  = loadSound('./sounds/ActivationTest/a7.mp3')
-  a9  = loadSound('./sounds/ActivationTest/a9.mp3')
-  a10 = loadSound('./sounds/ActivationTest/a10.mp3')
+  // a0 = loadSound('./sounds/ActivationTest/a0.mp3')
+  // a1 = loadSound('./sounds/ActivationTest/a1.mp3')
+  // a3 = loadSound('./sounds/ActivationTest/a3.mp3')
+  // a5 = loadSound('./sounds/ActivationTest/a5.mp3')
+  // a7 = loadSound('./sounds/ActivationTest/a7.mp3')
+  // a9 = loadSound('./sounds/ActivationTest/a9.mp3')
+  // a10 = loadSound('./sounds/ActivationTest/a10.mp3')
+  // exit = loadSound('./sounds/ActivationV3/exit.mp3')
 
-  d9  = loadSound('./sounds/DeactivationTest/d9.mp3')
-  d7  = loadSound('./sounds/DeactivationTest/d7.mp3')
-  d5  = loadSound('./sounds/DeactivationTest/d5.mp3')
-  d3  = loadSound('./sounds/DeactivationTest/d3.mp3')
-  d1  = loadSound('./sounds/DeactivationTest/d1.mp3')
-  d0  = loadSound('./sounds/DeactivationTest/d0.mp3')
+  // urg1 = loadSound("./sounds/ActivationTest/urging 1.mp3");
+  // urg2 = loadSound("./sounds/ActivationTest/urging 2.mp3");
+  // d9 = loadSound('./sounds/DeactivationTest/d9.mp3')
+  // d7 = loadSound('./sounds/DeactivationTest/d7.mp3')
+  // d5 = loadSound('./sounds/DeactivationTest/d5.mp3')
+  // d3 = loadSound('./sounds/DeactivationTest/d3.mp3')
+  // d1 = loadSound('./sounds/DeactivationTest/d1.mp3')
+  // d0 = loadSound('./sounds/DeactivationTest/d0.mp3')
 }
 
 function setup() {
-  /* websocket connection */
-  // socket.onopen = openSocket
-  // socket.onmessage = showData
+  createCanvas(windowWidth, windowHeight)
+  store.showSequence = false
+  store.seqLit = false
 
   /* serial port */
   serial = new p5.SerialPort()           	// make a new instance of the serialport library
@@ -258,17 +296,40 @@ function setup() {
   serial.open(portName)                  	// open a serial port
 
   /* sound settings */
-  uploadingVoice 	= [u1, u2, u3, u4, u5, u6]
-  uploadingSound 	= [s11, s12, s13, s14]
-  actDeactVoice 	= [a0, a1, a3, a5, a7, a9, a10, d9, d7, d5, d3, d1, d0]
+  uploadingVoice = [u1, u2, u3, u4, u5, u6]
+  uploadingSound = [s11, s12, s13, s14]
+  actDeactVoice = [a0, a1, a3, a5, a7, a9, a10, d1]
+
+  /* timer settings */
+  // move to start session button click function
+  store.lastTime = millis()
+
 }
 
 function draw() {
-  var fmtString = store.currentState
+  /* p5 canvas sketch */
+  background(0)
+  textSize(20)
+  fill(255, 0, 0)
+  text("waiver:", 10, windowHeight / 2 - 60)
+  fill(255)
+  text("Warning: never take off your headset when the session is in progress, as it might cause irreversible brain damage.", 10, windowHeight / 2 - 30)
+  text("In case of any detected discomfort or malfunction, emergency instruction will light up.", 10, windowHeight / 2)
+  if (store.showSequence) {   //blink white and red
+    if (millis() - store.seqLastTime > 1000) {
+      store.seqLit = !store.seqLit
+      store.seqLastTime = millis()
+    }
+    if (store.seqLit) {
+      fill(255, 0, 0)
+    } else {
+      fill(255)
+    }
+    text("To shut down the program, deactivate the modules in the following sequence: 1, 3, 5, 7, 9, 2, 4, 6, 8, 10", 10, windowHeight / 2 + 30)
+  }
 
-  // console.log(store.currentState)
-
-  switch (fmtString) {
+  /* p5 sound and main program */
+  switch (store.currentState) {
     case 'sleeping':
       setter.activateAction({
         soundFile: a0,
@@ -280,7 +341,6 @@ function draw() {
         soundFile: a1,
         startTime: 3
       }, () => {
-        Tone.Transport.start()
         s1.start()
       }, a0.isPlaying())
       break
@@ -318,14 +378,16 @@ function draw() {
       setter.activateAction({
         soundFile: a9,
         startTime: false
-      })
+      }, false, a7.isPlaying())
       break
-    case 'regular_final':
+    // case 'regular_final':
+    //   break
+    case 'regular_deactivated':
+      console.log('regular deactivated')
       setter.activateAction({
-        soundFile: a10,
-        startTime: 3
+        soundFile: exit,
+        startTime: false
       }, () => {
-        s10.start()
         s1.stop()
         s2.stop()
         s3.stop()
@@ -334,14 +396,11 @@ function draw() {
         s6.stop()
         s7.stop()
       }, a9.isPlaying())
-      break
-    case 'regular_deactivated':
-      console.log('regular deactivated')
       break
     case 'advanced_0':
       setter.activateAction({
         soundFile: a10,
-        startTime: 3
+        startTime: false
       }, () => {
         s10.start()
         s1.stop()
@@ -352,15 +411,17 @@ function draw() {
         s6.stop()
         s7.stop()
       }, a9.isPlaying())
-      flags.enteredState.regular_final = true
       break
     case 'advanced_1':
-      if (!a10.isPlaying() && !setter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+      if (!a10.isPlaying() && !getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
         setter.deactivateAction(d9, false, true)
       }
+      // force sending serial data out of setter function
+      // because there's gap between regular and advance state
+      setter.sendSerialData()
       break
     case 'advanced_2':
-      setter.deactivateAction(d9, function() {
+      setter.deactivateAction(d9, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -368,7 +429,7 @@ function draw() {
       setter.deactivateAction(d7, false, true)
       break
     case 'advanced_4':
-      setter.deactivateAction(d7, function() {
+      setter.deactivateAction(d7, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -376,7 +437,7 @@ function draw() {
       setter.deactivateAction(d5, false, true)
       break
     case 'advanced_6':
-      setter.deactivateAction(d5, function() {
+      setter.deactivateAction(d5, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -384,7 +445,7 @@ function draw() {
       setter.deactivateAction(d3, false, true)
       break
     case 'advanced_8':
-      setter.deactivateAction(d3, function() {
+      setter.deactivateAction(d3, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -393,52 +454,46 @@ function draw() {
       console.log('advanced final')
       break
     case 'advanced_deactivated':
-      setter.deactivateAction(d1, function() {
-        s11.stop()
-        s12.stop()
-        s13.stop()
-        s14.stop()
-        s10.stop()
-        ampEnv.triggerAttackRelease("0.3")
-        osc1.start()
-        osc2.start()
-        osc3.start()
-        d0.play(1)
-        if(!d0.isPlaying){
-          osc1.stop()
-          osc2.stop()
-          osc3.stop()
-        }
-      })
+      setter.deactivateAction(d0, false, true)
+      store.showSequence = false
       break
   }
 
-  // console.log(flags.isPlayingSound)
-  // if (store.currentState == 'sleeping') serial.write(72)
-  // else if (store.currentState == 'regular_1') serial.write(66)
-  // else serial.write(65)
+  // once entering advanced_1 && a10 stops, trigger uploading voice timer,
+  if ((store.currentState == 'advanced_0' && !a10.isPlaying()) || store.currentState == 'advanced_1' || store.currentState == 'advanced_2' || store.currentState == 'advanced_3' || store.currentState == 'advanced_4' || store.currentState == 'advanced_5' || store.currentState == 'advanced_6' || store.currentState == 'advanced_7' || store.currentState == 'advanced_8' || store.currentState == 'advanced_final') {
+    setter.startUploadingTimer();
+  }
+
+  // if(currentstate = regular 1-8 && currentState !==lastState)
+  if (store.currentState == 'regular_1' || store.currentState == 'regular_2' || store.currentState == 'regular_3' || store.currentState == 'regular_4' || store.currentState == 'regular_5' || store.currentState == 'regular_6' || store.currentState == 'regular_7' || store.currentState == 'regular_8' && store.currentState !== lastState) {
+    // store.lastTime = millis()
+    setter.startUrgingTimer()
+  }
+
+  /* reset lastState */
+  lastState = store.currentState
 }
+
+
+
+
+
 
 /*
 ** serial port functions
 */
-function keyPressed() {
-  var outByte
-	outByte = byte(key * 25); // map the key to a range from 0 to 225
- 	console.log(outByte); // send it out the serial port
-}
 
 // get the list of ports:
 function printList(portList) {
   // portList is an array of serial port names
   for (var i = 0; i < portList.length; i++) {
     // Display the list the console:
-    console.log(i + " " + portList[i]);
+    console.log(i + " " + portList[i])
   }
 }
 
 function serverConnected() {
-  console.log('connected to server.');
+  console.log('connected to server.')
 }
 
 function portOpen() {
@@ -446,25 +501,19 @@ function portOpen() {
 }
 
 function serialEvent() {
-  // read a string from the serial port
-  // until you get carriage return and newline:
-  var inString = serial.readStringUntil('\r\n');
-  //check to see that there's actually a string there:
+  var inString = serial.readStringUntil('\r\n')
   if (inString.length > 0) {
     if (inString !== 'hello') {
       var readValue = split(inString, ',')[0]
       update.currentState(readValue)
-      // console.log(readValue)
-      var sensors = split(inString, ',');           // split the string on the commas
     }
-    // serial.write('x'); // send a byte requesting more serial data
   }
 }
 
 function serialError(err) {
-  console.log('Something went wrong with the serial port. ' + err);
+  console.log('Something went wrong with the serial port. ' + err)
 }
 
 function portClose() {
-  console.log('The serial port closed.');
+  console.log('The serial port closed.')
 }
