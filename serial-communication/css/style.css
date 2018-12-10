@@ -1,0 +1,125 @@
+html, body {
+	color: #ecf0f1;
+	background-color: black;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+
+button {
+	border: none;
+	margin: 0;
+	padding: 0;
+	width: auto;
+	overflow: visible;
+
+	background: transparent;
+
+	/* inherit font & color from ancestor */
+	color: inherit;
+	font: inherit;
+
+	/* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+	line-height: normal;
+
+	/* Corrects font smoothing for webkit */
+	-webkit-font-smoothing: inherit;
+	-moz-osx-font-smoothing: inherit;
+
+	/* Corrects inability to style clickable `input` types in iOS */
+	-webkit-appearance: none;
+}
+
+button:focus {
+	outline: 0;
+}
+
+button:hover {
+	cursor: pointer;
+}
+
+&::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+.container {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	height: 100vh;
+}
+
+.wrapper {
+	max-width: 60%;
+	margin-bottom: 5%;
+}
+
+.heading {
+	display: block;
+	font-size: 40px;
+	text-align: center;
+	margin-bottom: 56px;
+}
+
+.heading.-warning {
+	color: red;
+}
+
+.waiver-wrapper {
+	margin-bottom: 64px;
+}
+
+.waiver-wrapper.-is-hidden {
+	display: none;
+}
+
+.waiver-wrapper__text {
+	text-align: center;
+	font-size: 24px;
+	line-height: 32px;
+}
+
+.trigger-btn {
+	display: block;
+	margin: 0 auto;
+	border: 1px solid #ecf0f1;
+	padding: 6px 12px 8px 12px;
+	opacity: 0.8;
+	transition: all .3s;
+}
+
+.trigger-btn.-is-hidden {
+	display: none;
+}
+
+.trigger-btn:hover {
+	opacity: 1;
+	transition: all .3s;
+}
+
+.instruction-wrapper {
+	display: none;
+}
+
+.instruction-wrapper.-is-shown {
+	display: block;
+}
+
+.instruction-wrapper__text {
+	text-align: center;
+	font-size: 24px;
+	line-height: 32px;
+}
+
+.instruction-wrapper__text.-sequence {
+	font-size: 88px;
+	font-weight: 700;
+  animation-name: sequence;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+	animation-timing-function: ease-in-out;
+}
+
+@keyframes sequence {
+  from {color: red;}
+  to {color: #e67e22;}
+}

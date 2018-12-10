@@ -16,6 +16,7 @@ var store = {
   seqLit: false
 }
 var flags = {
+  startSession: false,
   isPlayingSound: false,
   enteredState: {
     sleeping: false,
@@ -143,6 +144,13 @@ var update = {
   isPlaying(state) {
     flags.isPlayingSound = state
   }
+}
+
+var domElement = {
+  btn: '',
+  instruction: '',
+  waiver: '',
+  heading: ''
 }
 
 
@@ -304,159 +312,160 @@ function setup() {
   // move to start session button click function
   store.lastTime = millis()
 
+  /* dom element */
+  domElement.btn = document.getElementById('btn')
+  domElement.waiver = document.getElementById('waiver')
+  domElement.instruction = document.getElementById('instruction')
+  domElement.heading = document.getElementById('heading')
 }
 
 function draw() {
-  /* p5 canvas sketch */
-  background(0)
-  textSize(20)
-  fill(255, 0, 0)
-  text("waiver:", 10, windowHeight / 2 - 60)
-  fill(255)
-  text("Warning: never take off your headset when the session is in progress, as it might cause irreversible brain damage.", 10, windowHeight / 2 - 30)
-  text("In case of any detected discomfort or malfunction, emergency instruction will light up.", 10, windowHeight / 2)
-  if (store.showSequence) {   //blink white and red
-    if (millis() - store.seqLastTime > 1000) {
-      store.seqLit = !store.seqLit
-      store.seqLastTime = millis()
-    }
-    if (store.seqLit) {
-      fill(255, 0, 0)
-    } else {
-      fill(255)
-    }
-    text("To shut down the program, deactivate the modules in the following sequence: 1, 3, 5, 7, 9, 2, 4, 6, 8, 10", 10, windowHeight / 2 + 30)
+  /* interface control */
+  domElement.btn.addEventListener('click', function() {
+    flags.startSession = true
+    domElement.btn.classList.add('-is-hidden')
+  })
+
+  if (store.showSequence) {
+    domElement.heading.innerHTML = 'WARNING'
+    domElement.heading.classList.add('-warning')
+    domElement.waiver.classList.add('-is-hidden')
+    domElement.instruction.classList.add('-is-shown')
   }
 
   /* p5 sound and main program */
-  switch (store.currentState) {
-    case 'sleeping':
-      setter.activateAction({
-        soundFile: a0,
-        startTime: false
-      }, false, false)
-      break
-    case 'regular_1':
-      setter.activateAction({
-        soundFile: a1,
-        startTime: 3
-      }, () => {
-        s1.start()
-      }, a0.isPlaying())
-      break
-    case 'regular_2':
-      setter.activateAction(false, () => s2.start(), a1.isPlaying())
-      break
-    case 'regular_3':
-      setter.activateAction({
-        soundFile: a3,
-        startTime: 1
-      }, () => s3.start(), a1.isPlaying())
-      break
-    case 'regular_4':
-      setter.activateAction(false, () => s4.start(), a3.isPlaying())
-      break
-    case 'regular_5':
-      setter.activateAction({
-        soundFile: a5,
-        startTime: 2
-      }, () => s5.start(), a3.isPlaying())
-      break
-    case 'regular_6':
-      setter.activateAction(false, () => s6.start(), a5.isPlaying())
-      break
-    case 'regular_7':
-      setter.activateAction({
-        soundFile: a7,
-        startTime: 1
-      }, () => s7.start(), a5.isPlaying())
-      break
-    case 'regular_8':
-      setter.activateAction(false, false, a7.isPlaying())
-      break
-    case 'regular_9':
-      setter.activateAction({
-        soundFile: a9,
-        startTime: false
-      }, false, a7.isPlaying())
-      break
-    // case 'regular_final':
-    //   break
-    case 'regular_deactivated':
-      console.log('regular deactivated')
-      setter.activateAction({
-        soundFile: exit,
-        startTime: false
-      }, () => {
-        s1.stop()
-        s2.stop()
-        s3.stop()
-        s4.stop()
-        s5.stop()
-        s6.stop()
-        s7.stop()
-      }, a9.isPlaying())
-      break
-    case 'advanced_0':
-      setter.activateAction({
-        soundFile: a10,
-        startTime: false
-      }, () => {
-        s10.start()
-        s1.stop()
-        s2.stop()
-        s3.stop()
-        s4.stop()
-        s5.stop()
-        s6.stop()
-        s7.stop()
-      }, a9.isPlaying())
-      break
-    case 'advanced_1':
-      if (!a10.isPlaying() && !getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
-        setter.deactivateAction(d9, false, true)
-      }
-      // force sending serial data out of setter function
-      // because there's gap between regular and advance state
-      setter.sendSerialData()
-      break
-    case 'advanced_2':
-      setter.deactivateAction(d9, function () {
-        ampEnv.triggerAttackRelease("0.3")
-      })
-      break
-    case 'advanced_3':
-      setter.deactivateAction(d7, false, true)
-      break
-    case 'advanced_4':
-      setter.deactivateAction(d7, function () {
-        ampEnv.triggerAttackRelease("0.3")
-      })
-      break
-    case 'advanced_5':
-      setter.deactivateAction(d5, false, true)
-      break
-    case 'advanced_6':
-      setter.deactivateAction(d5, function () {
-        ampEnv.triggerAttackRelease("0.3")
-      })
-      break
-    case 'advanced_7':
-      setter.deactivateAction(d3, false, true)
-      break
-    case 'advanced_8':
-      setter.deactivateAction(d3, function () {
-        ampEnv.triggerAttackRelease("0.3")
-      })
-      break
-    case 'advanced_final':
-      setter.deactivateAction(d1, false, true)
-      console.log('advanced final')
-      break
-    case 'advanced_deactivated':
-      setter.deactivateAction(d0, false, true)
-      store.showSequence = false
-      break
+  if (flags.startSession) {
+    switch (store.currentState) {
+      case 'sleeping':
+        setter.activateAction({
+          soundFile: a0,
+          startTime: false
+        }, false, false)
+        break
+      case 'regular_1':
+        setter.activateAction({
+          soundFile: a1,
+          startTime: 3
+        }, () => {
+          s1.start()
+        }, a0.isPlaying())
+        break
+      case 'regular_2':
+        setter.activateAction(false, () => s2.start(), a1.isPlaying())
+        break
+      case 'regular_3':
+        setter.activateAction({
+          soundFile: a3,
+          startTime: 1
+        }, () => s3.start(), a1.isPlaying())
+        break
+      case 'regular_4':
+        setter.activateAction(false, () => s4.start(), a3.isPlaying())
+        break
+      case 'regular_5':
+        setter.activateAction({
+          soundFile: a5,
+          startTime: 2
+        }, () => s5.start(), a3.isPlaying())
+        break
+      case 'regular_6':
+        setter.activateAction(false, () => s6.start(), a5.isPlaying())
+        break
+      case 'regular_7':
+        setter.activateAction({
+          soundFile: a7,
+          startTime: 1
+        }, () => s7.start(), a5.isPlaying())
+        break
+      case 'regular_8':
+        setter.activateAction(false, false, a7.isPlaying())
+        break
+      case 'regular_9':
+        setter.activateAction({
+          soundFile: a9,
+          startTime: false
+        }, false, a7.isPlaying())
+        break
+      // case 'regular_final':
+      //   break
+      case 'regular_deactivated':
+        console.log('regular deactivated')
+        setter.activateAction({
+          soundFile: exit,
+          startTime: false
+        }, () => {
+          s1.stop()
+          s2.stop()
+          s3.stop()
+          s4.stop()
+          s5.stop()
+          s6.stop()
+          s7.stop()
+        }, a9.isPlaying())
+        break
+      case 'advanced_0':
+        setter.activateAction({
+          soundFile: a10,
+          startTime: false
+        }, () => {
+          s10.start()
+          s1.stop()
+          s2.stop()
+          s3.stop()
+          s4.stop()
+          s5.stop()
+          s6.stop()
+          s7.stop()
+        }, a9.isPlaying())
+        // update showSequence to control interface
+        store.showSequence = true
+        break
+      case 'advanced_1':
+        if (!a10.isPlaying() && !getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+          setter.deactivateAction(d9, false, true)
+        }
+        // force sending serial data out of setter function
+        // because there's gap between regular and advance state
+        setter.sendSerialData()
+        break
+      case 'advanced_2':
+        setter.deactivateAction(d9, function () {
+          ampEnv.triggerAttackRelease("0.3")
+        })
+        break
+      case 'advanced_3':
+        setter.deactivateAction(d7, false, true)
+        break
+      case 'advanced_4':
+        setter.deactivateAction(d7, function () {
+          ampEnv.triggerAttackRelease("0.3")
+        })
+        break
+      case 'advanced_5':
+        setter.deactivateAction(d5, false, true)
+        break
+      case 'advanced_6':
+        setter.deactivateAction(d5, function () {
+          ampEnv.triggerAttackRelease("0.3")
+        })
+        break
+      case 'advanced_7':
+        setter.deactivateAction(d3, false, true)
+        break
+      case 'advanced_8':
+        setter.deactivateAction(d3, function () {
+          ampEnv.triggerAttackRelease("0.3")
+        })
+        break
+      case 'advanced_final':
+        setter.deactivateAction(d1, false, true)
+        console.log('advanced final')
+        break
+      case 'advanced_deactivated':
+        setter.deactivateAction(d0, false, true)
+        store.showSequence = false
+        break
+    }
   }
 
   // once entering advanced_1 && a10 stops, trigger uploading voice timer,
