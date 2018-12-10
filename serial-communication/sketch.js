@@ -3,14 +3,14 @@
 */
 
 var serial
-var portName = '/dev/cu.usbmodem141101'
+var portName = '/dev/cu.usbmodem14621'
 
 var store = {
   currentState: 'sleeping',
   prevSoundFile: '',
   counter: 0,
   lastTime: 0,
-  uploadLastTime:0,
+  uploadLastTime: 0,
 }
 var flags = {
   isPlayingSound: false,
@@ -48,7 +48,7 @@ var setter = {
       // default p5 soundfile play
       if (soundFileObj) {
         console.log(soundFileObj)
-        var {soundFile, startTime} = soundFileObj
+        var { soundFile, startTime } = soundFileObj
         if (startTime)
           soundFile.play(startTime)
         else
@@ -56,7 +56,7 @@ var setter = {
 
         // update isPlaying flag
         update.isPlaying(true)
-        soundFile.onended(function() {
+        soundFile.onended(function () {
           update.isPlaying(false)
         })
       }
@@ -69,7 +69,7 @@ var setter = {
 
     if (!flags.enteredState[store.currentState]) {
       store.lastTime = millis();
-      if(store.currentState == advanced_0 ){
+      if (store.currentState == 'advanced_0') {
         store.uploadLastTime = millis();
       }
     }
@@ -83,13 +83,14 @@ var setter = {
   deactivateAction(soundFile = false, toneCallback = false, isToPlay = false) {
     console.log(store.currentState)
     console.log(flags.enteredState[store.currentState])
-    if(!setter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+    if (!getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
       if (isToPlay) {
         soundFile.play()
       } else {
-        if(soundFile.isPlaying()) {
-          if (soundFile) soundFile.stop()
+        if (soundFile.isPlaying()) {
+          console.log('in to play function')
           if (toneCallback) toneCallback()
+          if (soundFile) soundFile.stop()
         }
       }
     }
@@ -101,8 +102,8 @@ var setter = {
   },
 
   startUrgingTimer() {
-    // console.log("urging timer starts");
-    // console.log(millis() - lastTime);
+    console.log("urging timer starts");
+    // console.log(millis() - store.lastTime);
     if (millis() - store.lastTime > 5000) {
       urg1.play();
       store.lastTime = millis();
@@ -114,7 +115,9 @@ var setter = {
 
   startUploadingTimer() {
     if (millis() - store.uploadLastTime > 7000 && store.counter < uploadingVoice.length) {
+      console.log(millis() - store.uploadLastTime);
       console.log("uploading in progess")
+      s10.stop()
       uploadingVoice[store.counter].play()
       if (store.counter < uploadingSound.length) {
         uploadingSound[store.counter].start()
@@ -125,7 +128,31 @@ var setter = {
       store.uploadLastTime = millis()
     }
   },
-  
+
+
+  // uploadingVoiceIsPlaying() {
+  //   let numOfUploadingVoices = uploadingVoice.filter(_voice => _voice.isPlaying() == true).length
+  //   if (numOfUploadingVoices == 1) {
+  //     return true
+  //   } else if (numOfUploadingVoices == 0) {
+  //     return false
+  //   }
+  // },
+
+  sendSerialData() {
+    // const isPlaying = getter.actDeactVoiceIsPlaying()
+    if (getter.actDeactVoiceIsPlaying()) serial.write(72)
+    else serial.write(66)
+    // if (getter.uploadingVoiceIsPlaying()) serial.write(80) //P
+    // else serial.write(81) //Q
+  }
+}
+
+var getter = {
+  actDeactVoiceIsPlaying() {
+    let numOfActDeactVoices = actDeactVoice.filter(_voice => _voice.isPlaying()).length
+    return numOfActDeactVoices === 1 ? 1 : 0
+  },
 
   uploadingVoiceIsPlaying() {
     let numOfUploadingVoices = uploadingVoice.filter(_voice => _voice.isPlaying() == true).length
@@ -134,19 +161,6 @@ var setter = {
     } else if (numOfUploadingVoices == 0) {
       return false
     }
-  },
-  
-  sendSerialData() {
-    const isPlaying = getter.actDeactVoiceIsPlaying()
-    if (isPlaying) serial.write(72)
-    else serial.write(66)
-  }
-}
-
-var getter = {
-  actDeactVoiceIsPlaying() {
-    let numOfActDeactVoices = actDeactVoice.filter(_voice => _voice.isPlaying()).length
-    return numOfActDeactVoices === 1 ? 1 : 0
   }
 }
 
@@ -261,33 +275,33 @@ function preload() {
   // d3 = loadSound("./sounds/Deactivation/d3.mp3");
   // d1 = loadSound("./sounds/Deactivation/d1.mp3");
   // d0 = loadSound("./sounds/Deactivation/d0.mp3");
-  
+
   // uploading voices files
-  u1  = loadSound('./sounds/Uploading/1initialize.mp3')
-  u2  = loadSound('./sounds/Uploading/2scanning.mp3')
-  u3  = loadSound('./sounds/Uploading/3mapping.mp3')
-  u4  = loadSound('./sounds/Uploading/4reestablishing.mp3')
-  u5  = loadSound('./sounds/Uploading/5uploading.mp3')
-  u6  = loadSound('./sounds/Uploading/Congratulations.mp3')
+  u1 = loadSound('./sounds/Uploading/1initialize.mp3')
+  u2 = loadSound('./sounds/Uploading/2scanning.mp3')
+  u3 = loadSound('./sounds/Uploading/3mapping.mp3')
+  u4 = loadSound('./sounds/Uploading/4reestablishing.mp3')
+  u5 = loadSound('./sounds/Uploading/5uploading.mp3')
+  u6 = loadSound('./sounds/Uploading/Congratulations.mp3')
 
   // testing voice files
-  a0  = loadSound('./sounds/ActivationTest/a0.mp3')
-  a1  = loadSound('./sounds/ActivationTest/a1.mp3')
-  a3  = loadSound('./sounds/ActivationTest/a3.mp3')
-  a5  = loadSound('./sounds/ActivationTest/a5.mp3')
-  a7  = loadSound('./sounds/ActivationTest/a7.mp3')
-  a9  = loadSound('./sounds/ActivationTest/a9.mp3')
+  a0 = loadSound('./sounds/ActivationTest/a0.mp3')
+  a1 = loadSound('./sounds/ActivationTest/a1.mp3')
+  a3 = loadSound('./sounds/ActivationTest/a3.mp3')
+  a5 = loadSound('./sounds/ActivationTest/a5.mp3')
+  a7 = loadSound('./sounds/ActivationTest/a7.mp3')
+  a9 = loadSound('./sounds/ActivationTest/a9.mp3')
   a10 = loadSound('./sounds/ActivationTest/a10.mp3')
   exit = loadSound('./sounds/ActivationV3/exit.mp3')
 
   urg1 = loadSound("./sounds/ActivationTest/urging 1.mp3");
   urg2 = loadSound("./sounds/ActivationTest/urging 2.mp3");
-  d9  = loadSound('./sounds/DeactivationTest/d9.mp3')
-  d7  = loadSound('./sounds/DeactivationTest/d7.mp3')
-  d5  = loadSound('./sounds/DeactivationTest/d5.mp3')
-  d3  = loadSound('./sounds/DeactivationTest/d3.mp3')
-  d1  = loadSound('./sounds/DeactivationTest/d1.mp3')
-  d0  = loadSound('./sounds/DeactivationTest/d0.mp3')
+  d9 = loadSound('./sounds/DeactivationTest/d9.mp3')
+  d7 = loadSound('./sounds/DeactivationTest/d7.mp3')
+  d5 = loadSound('./sounds/DeactivationTest/d5.mp3')
+  d3 = loadSound('./sounds/DeactivationTest/d3.mp3')
+  d1 = loadSound('./sounds/DeactivationTest/d1.mp3')
+  d0 = loadSound('./sounds/DeactivationTest/d0.mp3')
 }
 
 function setup() {
@@ -308,9 +322,14 @@ function setup() {
   serial.open(portName)                  	// open a serial port
 
   /* sound settings */
-  uploadingVoice 	= [u1, u2, u3, u4, u5, u6]
-  uploadingSound 	= [s11, s12, s13, s14]
-  actDeactVoice 	= [a0, a1, a3, a5, a7, a9, a10, d9, d7, d5, d3, d1, d0]
+  uploadingVoice = [u1, u2, u3, u4, u5, u6]
+  uploadingSound = [s11, s12, s13, s14]
+  // actDeactVoice 	= [a0, a1, a3, a5, a7, a9, a10, d9, d7, d5, d3, d1, d0]
+  actDeactVoice = [a0, a1, a3, a5, a7, a9, a10, d1]
+
+  //move to start session button click function
+  store.lastTime = millis();
+
 }
 
 function draw() {
@@ -417,12 +436,12 @@ function draw() {
 
       break
     case 'advanced_1':
-      if (!a10.isPlaying() && !setter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
+      if (!a10.isPlaying() && !getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
         setter.deactivateAction(d9, false, true)
       }
       break
     case 'advanced_2':
-      setter.deactivateAction(d9, function() {
+      setter.deactivateAction(d9, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -430,7 +449,7 @@ function draw() {
       setter.deactivateAction(d7, false, true)
       break
     case 'advanced_4':
-      setter.deactivateAction(d7, function() {
+      setter.deactivateAction(d7, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -438,7 +457,7 @@ function draw() {
       setter.deactivateAction(d5, false, true)
       break
     case 'advanced_6':
-      setter.deactivateAction(d5, function() {
+      setter.deactivateAction(d5, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -446,7 +465,7 @@ function draw() {
       setter.deactivateAction(d3, false, true)
       break
     case 'advanced_8':
-      setter.deactivateAction(d3, function() {
+      setter.deactivateAction(d3, function () {
         ampEnv.triggerAttackRelease("0.3")
       })
       break
@@ -455,23 +474,22 @@ function draw() {
       console.log('advanced final')
       break
     case 'advanced_deactivated':
-      setter.deactivateAction(d1, function() {
-        s11.stop()
-        s12.stop()
-        s13.stop()
-        s14.stop()
-        s10.stop()
-        ampEnv.triggerAttackRelease("0.3")
-        osc1.start()
-        osc2.start()
-        osc3.start()
-        d0.play(1)
-        if(!d0.isPlaying){
-          osc1.stop()
-          osc2.stop()
-          osc3.stop()
-        }
-      })
+      setter.deactivateAction(d0, false, true)
+      //sound looping
+      // console.log('in d0 tone')
+      // s11.stop()
+      // s12.stop()
+      // s13.stop()
+      // s14.stop()
+      // ampEnv.triggerAttackRelease("0.3")
+      // osc1.start()
+      // osc2.start()
+      // osc3.start()
+      // if (!d0.isPlaying) {
+      //   osc1.stop()
+      //   osc2.stop()
+      //   osc3.stop()
+      // }
       break
   }
 
@@ -482,13 +500,13 @@ function draw() {
 
 
   //once entering advanced_1 && a10 stops, trigger uploading voice timer,
-  if (store.currentState == advanced_1 || store.currentState == advanced_2 || store.currentState == advanced_3 || store.currentState == advanced_4 || store.currentState == advanced_5 || store.currentState == advanced_6 || store.currentState == advanced_7 || store.currentState == advanced_8 || store.currentState == advanced_final  && !a10.isPlaying()) {
-    startUploadingTimer();
+  if ((store.currentState == 'advanced_0' && !a10.isPlaying()) || store.currentState == 'advanced_1' || store.currentState == 'advanced_2' || store.currentState == 'advanced_3' || store.currentState == 'advanced_4' || store.currentState == 'advanced_5' || store.currentState == 'advanced_6' || store.currentState == 'advanced_7' || store.currentState == 'advanced_8' || store.currentState == 'advanced_final') {
+    setter.startUploadingTimer();
   }
 
   //if(currentstate = regular 1-8 && currentState !==lastState)
-  if(store.currentState == 'sleeping' || store.currentState == 'regular_1' || store.currentState == 'regular_2' || store.currentState == 'regular_3'|| store.currentState == 'regular_4'|| store.currentState == 'regular_5'|| store.currentState == 'regular_6'|| store.currentState == 'regular_7'|| store.currentState == 'regular_8' && store.currentState !== lastState){
-    store.lastTime = millis()
+  if (store.currentState == 'regular_1' || store.currentState == 'regular_2' || store.currentState == 'regular_3' || store.currentState == 'regular_4' || store.currentState == 'regular_5' || store.currentState == 'regular_6' || store.currentState == 'regular_7' || store.currentState == 'regular_8' && store.currentState !== lastState) {
+    // store.lastTime = millis()
     setter.startUrgingTimer()
   }
   lastState = store.currentState

@@ -2,7 +2,7 @@
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
-  #include <avr/power.h>
+#include <avr/power.h>
 #endif
 #define PIN 7
 #define N_LEDS 60
@@ -42,6 +42,8 @@ String currentStage = "sleeping";
 boolean isRunning = true; // true if user is here
 boolean isActivatingStage = true;
 boolean isPlayingSounds = false;
+//ada update
+boolean isUploading = false;
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -62,11 +64,11 @@ void moveModule() {
   {
     isRunning = false;
   }
-  else if (currentStage == "advanced_deactivated")
-  {
-    isRunning = false;
-    currentStage = "sleeping";
-  }
+  //  else if (currentStage == "advanced_deactivated")
+  //  {
+  //    isRunning = false;
+  //    currentStage = "sleeping";
+  //  }
 }
 
 /* state machine */
@@ -226,18 +228,24 @@ void ModuleSet::updateBtnState() {
     // but only before activating final stage
     if (isActivatingStage) {
       btnIsLocked = true;
-    // or only one deactivation module left
+      // or only one deactivation module left
     } else if (!isActivatingStage && insertedTabletsNum == 1) {
       btnIsLocked = true;
-    // or only when all modules are inserted
+      // or only when all modules are inserted
     } else if (insertedTabletsNum == 10) {
       btnIsLocked = true;
-    }    
-  } else {
+    }
+  }
+  //ada update
+//  else if (isUploading) {
+//    btnIsLocked = true;
+//  }
+
+  else {
     // reverse btn locked state after sound ends
     if (!btnIsOn) btnIsLocked = false;
   }
-  
+
   _btnRead = digitalRead(_btnPin);
   boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
@@ -302,7 +310,7 @@ void ModuleSet::updateBtnState() {
         if (enterLastTablet) insertedTabletsNum = modulesNum;
         else insertedTabletsNum -= 1;
       }
-      
+
     } else {
       switch (insertedTabletsNum) {
         case modulesNum:
@@ -345,11 +353,11 @@ void ModuleSet::updateBtnState() {
     if (!btnIsLocked) {
       if (btnIsOn) {
         _servo.write(180);
-        delay(1);        
+        delay(1);
       }
       else {
         _servo.write(0);
-        delay(1);        
+        delay(1);
       }
     }
 
@@ -365,8 +373,12 @@ void ModuleSet::updateBtnState() {
         // and will be altered accordingly in upward deactivation condition
         btnIsLocked = true;
       }
-
     }
+
+    //    //ada update
+    //    if (debouncePassed && !isPlayingSounds) {
+    //      btnIsLocked = true;
+    //    }
   }
 
   _btnWasOn = _btnRead;
@@ -492,14 +504,14 @@ void setup() {
   strip.begin();
   strip.show();
 
-//  // record time when button pressed
-//  buttonPressedTime = millis();
+  //  // record time when button pressed
+  //  buttonPressedTime = millis();
 }
 
 /*
    loop
 */
-void loop() {  
+void loop() {
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
@@ -513,12 +525,21 @@ void loop() {
 
   Serial.println(currentStage);
 
-  if (Serial.available() > 0) {  
-     incomingByte = Serial.read(); 
-     if (incomingByte == 'H') { 
-        isPlayingSounds = true;
-     } else {
-        isPlayingSounds = false;       
-     }
-   }    
+  if (Serial.available() > 0) {
+    incomingByte = Serial.read();
+    if (incomingByte == 'H') {
+      isPlayingSounds = true;
+    } else {
+      isPlayingSounds = false;
+    }
+
+//    //ada update : if I send another character 'P' back for uploadVoiceIsPlaying, 
+      //arduino doesn't lock button when actDeactVoiceIsPlaying  (incomingbyte = 'H')
+      
+//    if (incomingByte == 'P') {
+//      isUploading = true;
+//    } else {
+//      isUploading = false;
+//    }
+  }
 }
