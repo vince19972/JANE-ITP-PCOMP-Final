@@ -1,23 +1,5 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
-#include <Adafruit_NeoPixel.h>
-#ifdef __AVR__
-#include <avr/power.h>
-#endif
-#define PIN 7
-#define N_LEDS 60
-
-/*
-   neo pixel settings
-*/
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN);
-//int R = 10;
-int G = 0;
-//int B = 10;
-int s = 1;
-// for blinking
-unsigned long buttonPressedTime;
 
 /*
     global store
@@ -34,7 +16,7 @@ const int btnStartNum = 31;
 
 int incomingByte;
 
-const int tabletMovingDuration = 5000; // millis
+const int tabletMovingDuration = 5000; 
 int insertedTabletsNum = 0;
 String currentStage = "sleeping";
 
@@ -51,8 +33,6 @@ void update_insertedTabletsNum(boolean toIncrease) {
   boolean tabletsAllOut = (insertedTabletsNum == 0);
   boolean readyToIncrease = (toIncrease && insertedTabletsNum < modulesNum && !tabletsAllIn);
   boolean readyToDecrease = (!toIncrease && insertedTabletsNum > 0 && !tabletsAllOut);
-
-  //  Serial.println(toIncrease);
 
   if (readyToIncrease) insertedTabletsNum += 1;
   if (readyToDecrease) insertedTabletsNum -= 1;
@@ -235,20 +215,12 @@ void ModuleSet::updateBtnState() {
     } else if (insertedTabletsNum == 10) {
       btnIsLocked = true;
     }
-  }
-  //ada update
-//  else if (isUploading) {
-//    btnIsLocked = true;
-//  }
-
-  else {
+  } else {
     // reverse btn locked state after sound ends
-    if (!btnIsOn) btnIsLocked = false;
+    // but only do this in activating stage
+    // or it'd unlock already ejected module
+    if (!btnIsOn && isActivatingStage) btnIsLocked = false;
   }
-
-  _btnRead = digitalRead(_btnPin);
-  boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
-  boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
   // update module locked status in deactivation stage
   if (!isActivatingStage) {
@@ -289,6 +261,14 @@ void ModuleSet::updateBtnState() {
     }
   }
 
+  if (!isActivatingStage) {
+    Serial.println(_btnPin);
+    Serial.println(btnIsLocked); 
+  }
+  
+  _btnRead = digitalRead(_btnPin);
+  boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
+  boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
   // btn is not locked, switch btn state
   if (readyToToggle) {
@@ -353,32 +333,12 @@ void ModuleSet::updateBtnState() {
     if (!btnIsLocked) {
       if (btnIsOn) {
         _servo.write(180);
-        delay(1);
-      }
-      else {
-        _servo.write(0);
-        delay(1);
-      }
-    }
-
-    // btn is locked, but check if it should be unlocked or not
-    if (debouncePassed && !isPlayingSounds) {
-      if (isActivatingStage) {
-        if (currentStage != "regular_final")
-          btnIsLocked = true;
-        else
-          btnIsLocked = false;
+        btnIsLocked = true;
       } else {
-        // lock all modules in deactivation stage in advance
-        // and will be altered accordingly in upward deactivation condition
+        _servo.write(0);
         btnIsLocked = true;
       }
     }
-
-    //    //ada update
-    //    if (debouncePassed && !isPlayingSounds) {
-    //      btnIsLocked = true;
-    //    }
   }
 
   _btnWasOn = _btnRead;
@@ -499,13 +459,6 @@ void setup() {
   pinMode(btnPin_8, INPUT);
   pinMode(btnPin_9, INPUT);
   pinMode(btnPin_10, INPUT);
-
-  // neo pixels
-  strip.begin();
-  strip.show();
-
-  //  // record time when button pressed
-  //  buttonPressedTime = millis();
 }
 
 /*
@@ -532,14 +485,5 @@ void loop() {
     } else {
       isPlayingSounds = false;
     }
-
-//    //ada update : if I send another character 'P' back for uploadVoiceIsPlaying, 
-      //arduino doesn't lock button when actDeactVoiceIsPlaying  (incomingbyte = 'H')
-      
-//    if (incomingByte == 'P') {
-//      isUploading = true;
-//    } else {
-//      isUploading = false;
-//    }
   }
 }
