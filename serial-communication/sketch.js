@@ -11,6 +11,9 @@ var store = {
   counter: 0,
   lastTime: 0,
   uploadLastTime: 0,
+  showSequence: false,
+  seqLastTime: 0, //for blinking deactivating sequence
+  seqLit:false
 }
 var flags = {
   isPlayingSound: false,
@@ -257,24 +260,24 @@ osc3.volume.value = -30
 */
 
 function preload() {
-  // //activating voice:
-  // a0 = loadSound("./sounds/ActivationV3/a0.mp3");
-  // a1 = loadSound("./sounds/ActivationV3/a1.mp3");
-  // a3 = loadSound("./sounds/ActivationV3/a3.mp3");
-  // a5 = loadSound("./sounds/ActivationV3/a5.mp3");
-  // a7 = loadSound("./sounds/ActivationV3/a7.mp3");
-  // a9 = loadSound("./sounds/ActivationV3/a9.mp3");
-  // a10 = loadSound("./sounds/ActivationV3/a10.mp3");
-  // exit = loadSound('./sounds/ActivationV3/exit.mp3');
-  // urg1 = loadSound("./sounds/ActivationV3/urging 1.mp3");
-  // urg2 = loadSound("./sounds/ActivationV3/urging 2.mp3");
-  // //deactivating voice
-  // d9 = loadSound("./sounds/Deactivation/d9.mp3");
-  // d7 = loadSound("./sounds/Deactivation/d7.mp3");
-  // d5 = loadSound("./sounds/Deactivation/d5.mp3");
-  // d3 = loadSound("./sounds/Deactivation/d3.mp3");
-  // d1 = loadSound("./sounds/Deactivation/d1.mp3");
-  // d0 = loadSound("./sounds/Deactivation/d0.mp3");
+  //activating voice:
+  a0 = loadSound("./sounds/ActivationV3/a0.mp3");
+  a1 = loadSound("./sounds/ActivationV3/a1.mp3");
+  a3 = loadSound("./sounds/ActivationV3/a3.mp3");
+  a5 = loadSound("./sounds/ActivationV3/a5.mp3");
+  a7 = loadSound("./sounds/ActivationV3/a7.mp3");
+  a9 = loadSound("./sounds/ActivationV3/a9.mp3");
+  a10 = loadSound("./sounds/ActivationV3/a10.mp3");
+  exit = loadSound('./sounds/ActivationV3/exit.mp3');
+  urg1 = loadSound("./sounds/ActivationV3/urging 1.mp3");
+  urg2 = loadSound("./sounds/ActivationV3/urging 2.mp3");
+  //deactivating voice
+  d9 = loadSound("./sounds/Deactivation/d9.mp3");
+  d7 = loadSound("./sounds/Deactivation/d7.mp3");
+  d5 = loadSound("./sounds/Deactivation/d5.mp3");
+  d3 = loadSound("./sounds/Deactivation/d3.mp3");
+  d1 = loadSound("./sounds/Deactivation/d1.mp3");
+  d0 = loadSound("./sounds/Deactivation/d0.mp3");
 
   // uploading voices files
   u1 = loadSound('./sounds/Uploading/1initialize.mp3')
@@ -284,27 +287,31 @@ function preload() {
   u5 = loadSound('./sounds/Uploading/5uploading.mp3')
   u6 = loadSound('./sounds/Uploading/Congratulations.mp3')
 
-  // testing voice files
-  a0 = loadSound('./sounds/ActivationTest/a0.mp3')
-  a1 = loadSound('./sounds/ActivationTest/a1.mp3')
-  a3 = loadSound('./sounds/ActivationTest/a3.mp3')
-  a5 = loadSound('./sounds/ActivationTest/a5.mp3')
-  a7 = loadSound('./sounds/ActivationTest/a7.mp3')
-  a9 = loadSound('./sounds/ActivationTest/a9.mp3')
-  a10 = loadSound('./sounds/ActivationTest/a10.mp3')
-  exit = loadSound('./sounds/ActivationV3/exit.mp3')
+  // // testing voice files
+  // a0 = loadSound('./sounds/ActivationTest/a0.mp3')
+  // a1 = loadSound('./sounds/ActivationTest/a1.mp3')
+  // a3 = loadSound('./sounds/ActivationTest/a3.mp3')
+  // a5 = loadSound('./sounds/ActivationTest/a5.mp3')
+  // a7 = loadSound('./sounds/ActivationTest/a7.mp3')
+  // a9 = loadSound('./sounds/ActivationTest/a9.mp3')
+  // a10 = loadSound('./sounds/ActivationTest/a10.mp3')
+  // exit = loadSound('./sounds/ActivationV3/exit.mp3')
 
-  urg1 = loadSound("./sounds/ActivationTest/urging 1.mp3");
-  urg2 = loadSound("./sounds/ActivationTest/urging 2.mp3");
-  d9 = loadSound('./sounds/DeactivationTest/d9.mp3')
-  d7 = loadSound('./sounds/DeactivationTest/d7.mp3')
-  d5 = loadSound('./sounds/DeactivationTest/d5.mp3')
-  d3 = loadSound('./sounds/DeactivationTest/d3.mp3')
-  d1 = loadSound('./sounds/DeactivationTest/d1.mp3')
-  d0 = loadSound('./sounds/DeactivationTest/d0.mp3')
+  // urg1 = loadSound("./sounds/ActivationTest/urging 1.mp3");
+  // urg2 = loadSound("./sounds/ActivationTest/urging 2.mp3");
+  // d9 = loadSound('./sounds/DeactivationTest/d9.mp3')
+  // d7 = loadSound('./sounds/DeactivationTest/d7.mp3')
+  // d5 = loadSound('./sounds/DeactivationTest/d5.mp3')
+  // d3 = loadSound('./sounds/DeactivationTest/d3.mp3')
+  // d1 = loadSound('./sounds/DeactivationTest/d1.mp3')
+  // d0 = loadSound('./sounds/DeactivationTest/d0.mp3')
 }
 
 function setup() {
+  createCanvas(windowWidth, windowHeight)
+  store.showSequence = false
+  store.seqLit = false
+
   /* websocket connection */
   // socket.onopen = openSocket
   // socket.onmessage = showData
@@ -333,6 +340,27 @@ function setup() {
 }
 
 function draw() {
+  background(0);
+  //waiver
+  textSize(20);
+  fill(255, 0, 0);
+  text("waiver:", 10, windowHeight / 2 - 60);
+  fill(255);
+  text("Warning: never take off your headset when the session is in progress, as it might cause irreversible brain damage.", 10, windowHeight / 2 - 30);
+  text("In case of any detected discomfort or malfunction, emergency instruction will light up.", 10, windowHeight / 2);
+  if (store.showSequence) {   //blink white and red
+    if (millis() - store.seqLastTime > 1000) {
+      store.seqLit = !store.seqLit
+      store.seqLastTime = millis();
+    }
+    if (store.seqLit) {
+      fill(255, 0, 0);
+    } else {
+      fill(255);
+    }
+    text("To shut down the program, deactivate the modules in the following sequence: 1, 3, 5, 7, 9, 2, 4, 6, 8, 10", 10, windowHeight / 2 + 30);
+  }
+
   var fmtString = store.currentState
 
   // console.log(store.currentState)
@@ -433,6 +461,9 @@ function draw() {
         s7.stop()
       }, a9.isPlaying())
       flags.enteredState.regular_final = true
+      if(!a10.isPlaying()){
+        store.showSequence = true;
+      }
 
       break
     case 'advanced_1':
@@ -475,6 +506,7 @@ function draw() {
       break
     case 'advanced_deactivated':
       setter.deactivateAction(d0, false, true)
+      store.showSequence = false;
       //sound looping
       // console.log('in d0 tone')
       // s11.stop()
