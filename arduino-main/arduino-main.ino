@@ -40,15 +40,7 @@ void update_insertedTabletsNum(boolean toIncrease) {
 
 /* state actions */
 void moveModule() {
-  if (currentStage == "regular_deactivated")
-  {
-    isRunning = false;
-  }
-  //  else if (currentStage == "advanced_deactivated")
-  //  {
-  //    isRunning = false;
-  //    currentStage = "sleeping";
-  //  }
+  if (currentStage == "regular_deactivated") isRunning = false;
 }
 
 /* state machine */
@@ -259,11 +251,6 @@ void ModuleSet::updateBtnState() {
         btnIsLocked = true;
         break;
     }
-  }
-
-  if (!isActivatingStage) {
-    Serial.println(_btnPin);
-    Serial.println(btnIsLocked); 
   }
   
   _btnRead = digitalRead(_btnPin);
