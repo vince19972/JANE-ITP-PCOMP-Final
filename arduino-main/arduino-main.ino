@@ -216,36 +216,37 @@ void ModuleSet::updateBtnState() {
 
   // update module locked status in deactivation stage
   if (!isActivatingStage) {
+    btnIsLocked = true;
     switch (insertedTabletsNum) {
       case modulesNum:
-        if (_btnPin == deactivateSequence[0]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[0] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 9:
-        if (_btnPin == deactivateSequence[1]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[1] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 8:
-        if (_btnPin == deactivateSequence[2]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[2] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 7:
-        if (_btnPin == deactivateSequence[3]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[3] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 6:
-        if (_btnPin == deactivateSequence[4]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[4] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 5:
-        if (_btnPin == deactivateSequence[5]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[5] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 4:
-        if (_btnPin == deactivateSequence[6]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[6] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 3:
-        if (_btnPin == deactivateSequence[7]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[7] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 2:
-        if (_btnPin == deactivateSequence[8]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[8] && !isPlayingSounds) btnIsLocked = false;
         break;
       case 1:
-        if (_btnPin == deactivateSequence[9]) btnIsLocked = false;
+        if (_btnPin == deactivateSequence[9] && !isPlayingSounds) btnIsLocked = false;
         break;
       default:
         btnIsLocked = true;
@@ -327,7 +328,7 @@ void ModuleSet::updateBtnState() {
       }
     }
   }
-
+  
   _btnWasOn = _btnRead;
 };
 
