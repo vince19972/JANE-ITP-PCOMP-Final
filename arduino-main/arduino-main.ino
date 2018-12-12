@@ -372,8 +372,8 @@ void ModuleSet::updateBtnState() {
   } else {
     if (currentStage == "sleeping") 
       led_moduleControl(_btnPin, rgb_sleeping);
-    else 
-      led_moduleControl(_btnPin, rgb_sleeping);
+//    else 
+//      led_rainbow(_btnPin);
   }
 
   // blink as locked btn is pressed
@@ -576,4 +576,30 @@ void led_moduleControl(int btnPin, int rgb [3]) {
   }
   
   strip.show();    
+}
+
+void led_rainbow(int btnPin) {
+  uint16_t i, j;
+  const int startPosition = getStartPosition(btnPin);
+  const int endPosition = getEndPosition(startPosition);  
+
+  for (j = 0; j < 256; j++) {
+    for (i = startPosition; i < endPosition; i++) {
+      strip.setPixelColor(i, Wheel((i + j) & 255));
+    }
+    strip.show();
+  }
+}
+
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if (WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
