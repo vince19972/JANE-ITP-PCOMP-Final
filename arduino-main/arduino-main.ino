@@ -48,6 +48,15 @@ const int multiple = 4;
 const int offsetDelta = 2;
 LPD8806 strip = LPD8806(nLEDs, dataPin, clockPin);
 
+// led timers
+int led_currentTime = 0;
+int led_lastTime = 0;
+
+// led colors
+int denyRGB [3] = {0, 0, 255};
+int controlledRGB [3] = {255, 0, 0};
+int restRGB [3] = {255, 255, 255};
+
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -190,6 +199,7 @@ class ModuleSet {
   private:
     // base vars
     int _btnRead = 0;
+    int _denyLastTime = 0;
 
     // btn toggle vars
     int _btnWasOn = !btnIsOn;
@@ -217,7 +227,7 @@ ModuleSet::ModuleSet(Servo servo, int btnPin) {
 };
 
 void ModuleSet::updateBtnState() {
-  // lock or unlock btn before doing anything
+  /*-- lock or unlock btn before doing anything --*/
   if (isPlayingSounds) {
     // but only before activating final stage
     if (isActivatingStage) {
@@ -236,7 +246,7 @@ void ModuleSet::updateBtnState() {
     if (!btnIsOn && isActivatingStage) btnIsLocked = false;
   }
 
-  // update module locked status in deactivation stage
+  /*-- update module locked status in deactivation stage --*/
   if (!isActivatingStage) {
     btnIsLocked = true;
     switch (insertedTabletsNum) {
@@ -280,7 +290,7 @@ void ModuleSet::updateBtnState() {
   boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
 
-  // btn is not locked, switch btn state
+  /*-- btn is not locked, switch btn state --*/
   if (readyToToggle) {
 
     // toggle btn state
@@ -339,7 +349,7 @@ void ModuleSet::updateBtnState() {
       _time = millis();
     }
 
-    // btn is not locked, move servo
+    /*-- btn is not locked, move servo --*/
     if (!btnIsLocked) {
       if (btnIsOn) {
         // move servo
@@ -352,20 +362,26 @@ void ModuleSet::updateBtnState() {
         // update btnIsLocked
         btnIsLocked = true;
       }
-    }
+    } 
   }
 
-  // led lights controlling depends on btnIsLocked value
-  int controlledRGB [3] = {255, 0, 0};
-  int restRGB [3] = {255, 255, 255};
-  
+  /*-- led lights controlling depends on btnIsLocked value --*/
+  // change light as locked
   if (btnIsLocked) {
     led_moduleControl(_btnPin, controlledRGB);
   } else {
     led_moduleControl(_btnPin, restRGB);
   }
 
-  // reset btnWasOn value for debounce function
+  // blink as locked btn is pressed
+  int denyLighInterval = millis() - _denyLastTime > 1500;
+  boolean toShowDenyLight = (btnIsLocked && (_btnRead && denyLighInterval));
+  if (toShowDenyLight) {
+    led_moduleControl(_btnPin, denyRGB);
+    _denyLastTime = millis();
+  }
+
+  /* reset btnWasOn value for debounce function --*/
   _btnWasOn = _btnRead;
 };
 
@@ -523,6 +539,19 @@ void loop() {
 /*
 ** led lights function
 */
+int getStartPosition(int btnPin) {
+  int fmtBtnPin = (btnPin % 10) - 1;
+  if (fmtBtnPin < 0) fmtBtnPin = 10;
+  int startPosition = fmtBtnPin * (nLEDs / 10);
+
+  return startPosition;
+}
+
+int getEndPosition(int startPosition) {
+  const int endPosition = startPosition + (nLEDs / 10);
+  return endPosition;
+}
+
 void led_default() {
   led_allWhite();
 }
@@ -535,10 +564,8 @@ void led_allWhite() {
 }
 
 void led_moduleControl(int btnPin, int rgb [3]) {
-  int fmtBtnPin = (btnPin % 10) - 1;
-  if (fmtBtnPin < 0) fmtBtnPin = 10;
-  int startPosition = fmtBtnPin * (nLEDs / 10);
-  const int endPosition = startPosition + (nLEDs / 10);
+  const int startPosition = getStartPosition(btnPin);
+  const int endPosition = getEndPosition(startPosition);
 
   for (unsigned int y = startPosition; y < endPosition; y++) {
     strip.setPixelColor(y, rgb[0], rgb[1], rgb[2]);  
