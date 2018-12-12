@@ -1,5 +1,7 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
+#include "LPD8806.h"
+#include "SPI.h"
 
 /*
     global store
@@ -26,6 +28,26 @@ boolean isActivatingStage = true;
 boolean isPlayingSounds = false;
 //ada update
 boolean isUploading = false;
+
+/* lpd 8806 (led strip) */
+// Number of RGB LEDs in strand
+const int nLEDs = 48;
+
+// Chose 2 pins for output; can be any valid output pins
+const int dataPin  = 2;
+const int clockPin = 3;
+
+// The offset is used to cycle colours along the strip
+int offset = 0;
+
+// Multiple is used to space out the spectrum, a value of 4 will be four 
+// times as many cycles as a value of 1 on any given length
+const int multiple = 4;
+
+// Number of steps the colour pattern advanc
+const int offsetDelta = 2;
+LPD8806 strip = LPD8806(nLEDs, dataPin, clockPin);
+
 
 /* update functions */
 void update_insertedTabletsNum(boolean toIncrease) {
@@ -447,12 +469,17 @@ void setup() {
   pinMode(btnPin_8, INPUT);
   pinMode(btnPin_9, INPUT);
   pinMode(btnPin_10, INPUT);
+
+  // init led
+  strip.begin();
+  strip.show();  
 }
 
 /*
    loop
 */
 void loop() {
+  // modules control
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
@@ -464,6 +491,14 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
+  // led control
+  unsigned int n;
+  for (n = 0; n < strip.numPixels(); n++) {
+    strip.setPixelColor(n, 255, 255, 255);  
+  }
+  strip.show();
+
+  // serial port control
   Serial.println(currentStage);
 
   if (Serial.available() > 0) {
