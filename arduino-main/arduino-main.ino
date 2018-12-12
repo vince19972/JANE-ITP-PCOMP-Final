@@ -53,9 +53,9 @@ int led_currentTime = 0;
 int led_lastTime = 0;
 
 // led colors
-int denyRGB [3] = {0, 0, 255};
-int controlledRGB [3] = {255, 0, 0};
-int restRGB [3] = {255, 255, 255};
+int rgb_sleeping [3] = {255, 255, 255};
+int rgb_inserted [3] = {255, 0, 0};
+int rgb_deny [3] = {0, 0, 255};
 
 
 /* update functions */
@@ -368,9 +368,12 @@ void ModuleSet::updateBtnState() {
   /*-- led lights controlling depends on btnIsLocked value --*/
   // change light as locked
   if (btnIsLocked) {
-    led_moduleControl(_btnPin, controlledRGB);
+    led_moduleControl(_btnPin, rgb_inserted);
   } else {
-    led_moduleControl(_btnPin, restRGB);
+    if (currentStage == "sleeping") 
+      led_moduleControl(_btnPin, rgb_sleeping);
+    else 
+      led_moduleControl(_btnPin, rgb_sleeping);
   }
 
   // blink as locked btn is pressed
@@ -378,7 +381,7 @@ void ModuleSet::updateBtnState() {
   boolean denyDebouncePassed = _btnRead == false && _btnWasOn == true && denyLighInterval;
   boolean toShowDenyLight = (btnIsLocked && denyDebouncePassed);
   if (toShowDenyLight) {
-    led_moduleControl(_btnPin, denyRGB);
+    led_moduleControl(_btnPin, rgb_deny);
     _denyLastTime = millis();
   }
 
