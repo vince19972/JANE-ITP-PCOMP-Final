@@ -31,7 +31,7 @@ boolean isUploading = false;
 
 /* lpd 8806 (led strip) */
 // Number of RGB LEDs in strand
-const int nLEDs = 48;
+const int nLEDs = 40;
 
 // Chose 2 pins for output; can be any valid output pins
 const int dataPin  = 2;
@@ -342,15 +342,30 @@ void ModuleSet::updateBtnState() {
     // btn is not locked, move servo
     if (!btnIsLocked) {
       if (btnIsOn) {
+        // move servo
         _servo.write(180);
+        // update btnIsLocked
         btnIsLocked = true;
       } else {
+        // move servo
         _servo.write(0);
+        // update btnIsLocked
         btnIsLocked = true;
       }
     }
   }
+
+  // led lights controlling depends on btnIsLocked value
+  int controlledRGB [3] = {255, 0, 0};
+  int restRGB [3] = {255, 255, 255};
   
+  if (btnIsLocked) {
+    led_moduleControl(_btnPin, controlledRGB);
+  } else {
+    led_moduleControl(_btnPin, restRGB);
+  }
+
+  // reset btnWasOn value for debounce function
   _btnWasOn = _btnRead;
 };
 
@@ -491,13 +506,6 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
-  // led control
-  unsigned int n;
-  for (n = 0; n < strip.numPixels(); n++) {
-    strip.setPixelColor(n, 255, 255, 255);  
-  }
-  strip.show();
-
   // serial port control
   Serial.println(currentStage);
 
@@ -509,4 +517,32 @@ void loop() {
       isPlayingSounds = false;
     }
   }
+}
+
+
+/*
+** led lights function
+*/
+void led_default() {
+  led_allWhite();
+}
+
+void led_allWhite() {
+  for (unsigned int n = 0; n < strip.numPixels(); n++) {
+    strip.setPixelColor(n, 255, 255, 255);  
+  }
+  strip.show();  
+}
+
+void led_moduleControl(int btnPin, int rgb [3]) {
+  int fmtBtnPin = (btnPin % 10) - 1;
+  if (fmtBtnPin < 0) fmtBtnPin = 10;
+  int startPosition = fmtBtnPin * (nLEDs / 10);
+  const int endPosition = startPosition + (nLEDs / 10);
+
+  for (unsigned int y = startPosition; y < endPosition; y++) {
+    strip.setPixelColor(y, rgb[0], rgb[1], rgb[2]);  
+  }
+  
+  strip.show();    
 }
