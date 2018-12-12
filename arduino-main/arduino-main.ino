@@ -374,8 +374,9 @@ void ModuleSet::updateBtnState() {
   }
 
   // blink as locked btn is pressed
-  int denyLighInterval = millis() - _denyLastTime > 1500;
-  boolean toShowDenyLight = (btnIsLocked && (_btnRead && denyLighInterval));
+  boolean denyLighInterval = millis() - _denyLastTime > 1000;
+  boolean denyDebouncePassed = _btnRead == false && _btnWasOn == true && denyLighInterval;
+  boolean toShowDenyLight = (btnIsLocked && denyDebouncePassed);
   if (toShowDenyLight) {
     led_moduleControl(_btnPin, denyRGB);
     _denyLastTime = millis();
