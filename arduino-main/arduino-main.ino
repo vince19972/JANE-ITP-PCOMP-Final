@@ -26,7 +26,6 @@ String currentStage = "sleeping";
 boolean isRunning = true; // true if user is here
 boolean isActivatingStage = true;
 boolean isPlayingSounds = false;
-//ada update
 boolean isUploading = false;
 
 /* lpd 8806 (led strip) */
@@ -54,8 +53,10 @@ int led_lastTime = 0;
 
 // led colors
 int rgb_sleeping [3] = {255, 255, 255};
-int rgb_inserted [3] = {255, 0, 0};
-int rgb_deny [3] = {0, 0, 255};
+int rgb_inserted [3] = {0, 0, 255};
+int rgb_advanced [3] = {255, 0, 0};
+int rgb_ejected [3] = {255, 255, 255};
+int rgb_deny [3] = {0, 255, 0};
 
 
 /* update functions */
@@ -367,18 +368,22 @@ void ModuleSet::updateBtnState() {
 
   /*-- led lights controlling depends on btnIsLocked value --*/
   // change light as locked
-  if (btnIsLocked) {
-    led_moduleControl(_btnPin, rgb_inserted);
+  if (isActivatingStage) {
+    if (btnIsLocked)
+      led_moduleControl(_btnPin, rgb_inserted);
   } else {
-    if (currentStage == "sleeping") 
-      led_moduleControl(_btnPin, rgb_sleeping);      
-//    else 
-//      led_rainbow(_btnPin);
+    if (btnIsOn)
+      led_moduleControl(_btnPin, rgb_advanced);         
+    else 
+      led_moduleControl(_btnPin, rgb_sleeping);         
   }
 
+  if (currentStage == "sleeping") 
+    led_moduleControl(_btnPin, rgb_sleeping);     
+
   // blink as locked btn is pressed
-  boolean denyLighInterval = millis() - _denyLastTime > 1000;
-  boolean denyDebouncePassed = _btnRead == false && _btnWasOn == true && denyLighInterval;
+  boolean denyLighInterval = (millis() - _denyLastTime > 1000);
+  boolean denyDebouncePassed = (_btnRead == false && _btnWasOn == true && denyLighInterval);
   boolean toShowDenyLight = (btnIsLocked && denyDebouncePassed);
   if (toShowDenyLight) {
     led_moduleControl(_btnPin, rgb_deny);
@@ -543,8 +548,46 @@ void loop() {
 /*
 ** led lights function
 */
+int fmtBtnPinToLedPin(int btnPin) {
+  int _moduloNum = (btnPin % 10);
+  int _fmtNum = 0;
+  switch (_moduloNum) {
+    case 1:
+      _fmtNum = 6;
+      break;      
+    case 2:
+      _fmtNum = 7;
+      break;      
+    case 3:
+      _fmtNum = 8;
+      break;
+    case 4:
+      _fmtNum = 9;
+      break;            
+    case 5:
+      _fmtNum = 0;
+      break;
+    case 6:
+      _fmtNum = 5;
+      break;      
+    case 7:
+      _fmtNum = 4;
+      break;      
+    case 8:
+      _fmtNum = 3;
+      break;
+    case 9:
+      _fmtNum = 2;
+      break;    
+    case 0:
+      _fmtNum = 1;
+      break;        
+  }
+  return _fmtNum;
+}
+
 int getStartPosition(int btnPin) {
-  int fmtBtnPin = (btnPin % 10) - 1;
+  int fmtBtnPin = fmtBtnPinToLedPin(btnPin) - 1;
   if (fmtBtnPin < 0) fmtBtnPin = 9;
   int startPosition = fmtBtnPin * (nLEDs / 10);
 
