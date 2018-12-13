@@ -4,6 +4,10 @@ html, body {
 	font-family: 'Roboto Condensed', sans-serif;
 }
 
+body.-warning {
+	background: red;
+}
+
 button {
 	border: none;
 	margin: 0;
@@ -121,5 +125,5 @@ button:hover {
 
 @keyframes sequence {
   from {color: red;}
-  to {color: #e67e22;}
+  to {color: white;}
 }

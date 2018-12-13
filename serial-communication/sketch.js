@@ -3,7 +3,7 @@
 */
 
 var serial
-var portName = '/dev/cu.usbmodem146101'
+var portName = '/dev/cu.usbmodem144201'
 
 var store = {
   currentState: 'sleeping',
@@ -52,6 +52,7 @@ var setter = {
           soundFile.play()
 
         // update isPlaying flag
+        if (!soundFile.isPlaying()) flags.isPlayingSound = false
         soundFile.onended(function () {
           flags.isPlayingSound = false
         })
@@ -105,8 +106,8 @@ var setter = {
   },
   startUploadingTimer() {
     if (millis() - store.uploadLastTime > 7000 && store.counter < uploadingVoice.length) {
-      console.log(millis() - store.uploadLastTime);
-      console.log("uploading in progess")
+      // console.log(millis() - store.uploadLastTime);
+      // console.log("uploading in progess")
       s10.stop()
       uploadingVoice[store.counter].play()
       if (store.counter < uploadingSound.length) {
@@ -115,6 +116,7 @@ var setter = {
       store.counter++
       store.uploadLastTime = millis()
     } else if (d9.isPlaying() || d7.isPlaying() || d5.isPlaying() || d3.isPlaying() || d1.isPlaying()) {
+      uploadingSound.forEach(sound => sound.stop())
       store.uploadLastTime = millis()
     }
   },
@@ -313,6 +315,7 @@ function setup() {
   store.lastTime = millis()
 
   /* dom element */
+  domElement.body = document.getElementById('body')
   domElement.btn = document.getElementById('btn')
   domElement.waiver = document.getElementById('waiver')
   domElement.instruction = document.getElementById('instruction')
@@ -328,6 +331,7 @@ function draw() {
 
   if (store.showSequence) {
     domElement.heading.innerHTML = 'WARNING'
+    domElement.body.classList.add('-warning')
     domElement.heading.classList.add('-warning')
     domElement.waiver.classList.add('-is-hidden')
     domElement.instruction.classList.add('-is-shown')
@@ -345,7 +349,7 @@ function draw() {
       case 'regular_1':
         setter.activateAction({
           soundFile: a1,
-          startTime: 3
+          startTime: false
         }, () => {
           s1.start()
         }, a0.isPlaying())
@@ -356,7 +360,7 @@ function draw() {
       case 'regular_3':
         setter.activateAction({
           soundFile: a3,
-          startTime: 1
+          startTime: false
         }, () => s3.start(), a1.isPlaying())
         break
       case 'regular_4':
@@ -365,7 +369,7 @@ function draw() {
       case 'regular_5':
         setter.activateAction({
           soundFile: a5,
-          startTime: 2
+          startTime: false
         }, () => s5.start(), a3.isPlaying())
         break
       case 'regular_6':
@@ -374,7 +378,7 @@ function draw() {
       case 'regular_7':
         setter.activateAction({
           soundFile: a7,
-          startTime: 1
+          startTime: false
         }, () => s7.start(), a5.isPlaying())
         break
       case 'regular_8':
@@ -459,7 +463,6 @@ function draw() {
         break
       case 'advanced_final':
         setter.deactivateAction(d1, false, true)
-        console.log('advanced final')
         break
       case 'advanced_deactivated':
         setter.deactivateAction(d0, false, true)
