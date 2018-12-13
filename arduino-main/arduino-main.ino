@@ -31,7 +31,7 @@ boolean isUploading = false;
 
 /* lpd 8806 (led strip) */
 // Number of RGB LEDs in strand
-const int nLEDs = 40;
+const int nLEDs = 80;
 
 // Chose 2 pins for output; can be any valid output pins
 const int dataPin  = 2;
@@ -371,7 +371,7 @@ void ModuleSet::updateBtnState() {
     led_moduleControl(_btnPin, rgb_inserted);
   } else {
     if (currentStage == "sleeping") 
-      led_moduleControl(_btnPin, rgb_sleeping);
+      led_moduleControl(_btnPin, rgb_sleeping);      
 //    else 
 //      led_rainbow(_btnPin);
   }
@@ -545,7 +545,7 @@ void loop() {
 */
 int getStartPosition(int btnPin) {
   int fmtBtnPin = (btnPin % 10) - 1;
-  if (fmtBtnPin < 0) fmtBtnPin = 10;
+  if (fmtBtnPin < 0) fmtBtnPin = 9;
   int startPosition = fmtBtnPin * (nLEDs / 10);
 
   return startPosition;
