@@ -54,8 +54,8 @@ int led_lastTime = 0;
 // led colors
 int rgb_sleeping [3] = {255, 255, 255};
 int rgb_inserted [3] = {0, 0, 255};
-int rgb_ejected [3] = {255, 255, 255};
-int rgb_deny [3] = {255, 168, 1};
+int rgb_ejected [3] = {255, 0, 0};
+int rgb_deny [3] = {255, 75, 0};
 
 
 /* update functions */
@@ -190,6 +190,7 @@ class ModuleSet {
     void updateBtnState();
     void moveTablet();
     void updateNeopixels();
+    void controlLight();
 
     int _servoPin;
     int _btnPin;
@@ -199,7 +200,10 @@ class ModuleSet {
   private:
     // base vars
     int _btnRead = 0;
-    int _denyLastTime = 0;
+
+    // LED vars
+    unsigned long _denyLastTime = 0;
+    unsigned long _blinkLastTime = 0;
 
     // btn toggle vars
     int _btnWasOn = !btnIsOn;
@@ -365,11 +369,33 @@ void ModuleSet::updateBtnState() {
     } 
   }
 
-  /*-- led lights controlling depends on btnIsLocked value --*/
+  /* reset btnWasOn value for debounce function --*/
+  _btnWasOn = _btnRead;
+};
+
+/*-- led lights controlling depends on btnIsLocked value --*/
+void ModuleSet::controlLight() {
   // change light as locked
   if (isActivatingStage) {
-    if (btnIsLocked)
-      led_moduleControl(_btnPin, rgb_inserted);
+      if (isPlayingSounds) {
+        led_moduleTalking(_btnPin, _blinkLastTime);
+//        led_moduleControl(_btnPin, rgb_deny); 
+      } else {
+        if (btnIsLocked) {
+          led_moduleControl(_btnPin, rgb_inserted); 
+        } else {
+          led_moduleControl(_btnPin, rgb_sleeping); 
+        }
+      }
+//    if (isPlayingSounds) {
+//      led_moduleTalking(_btnPin, _blinkLastTime);
+//    } else {
+//      led_moduleControl(_btnPin, rgb_sleeping); 
+//      
+//      if (btnIsLocked) {
+//        led_moduleControl(_btnPin, rgb_inserted); 
+//      }
+//    }
   } else {
     if (btnIsOn)
       led_moduleRainbow(_btnPin);
@@ -387,11 +413,8 @@ void ModuleSet::updateBtnState() {
   if (toShowDenyLight) {
     led_moduleControl(_btnPin, rgb_deny);
     _denyLastTime = millis();
-  }
-
-  /* reset btnWasOn value for debounce function --*/
-  _btnWasOn = _btnRead;
-};
+  }  
+}
 
 void ModuleSet::moveTablet() {
   updateBtnState();
@@ -518,7 +541,7 @@ void setup() {
    loop
 */
 void loop() {
-  // modules control
+  /*-- modules control --*/
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
   ModuleSet_3.moveTablet();
@@ -530,7 +553,7 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
-  // serial port control
+  /*-- serial control --*/
   Serial.println(currentStage);
 
   if (Serial.available() > 0) {
@@ -541,6 +564,18 @@ void loop() {
       isPlayingSounds = false;
     }
   }
+
+  /*-- light control --*/
+  ModuleSet_1.controlLight();
+  ModuleSet_2.controlLight();
+  ModuleSet_3.controlLight();
+  ModuleSet_4.controlLight();
+  ModuleSet_5.controlLight();
+  ModuleSet_6.controlLight();
+  ModuleSet_7.controlLight();
+  ModuleSet_8.controlLight();
+  ModuleSet_9.controlLight();
+  ModuleSet_10.controlLight();  
 }
 
 
@@ -628,6 +663,31 @@ void led_moduleRainbow(int btnPin) {
   for (unsigned int y = startPosition; y < endPosition; y++) {
     strip.setPixelColor(y, random(125), random(125), random(125));  
   }
+  
+  strip.show(); 
+}
+
+void led_moduleTalking(int btnPin, unsigned long blinkLastTime) {
+  uint16_t i, j;
+  const int startPosition = getStartPosition(btnPin);
+  const int endPosition = getEndPosition(startPosition);  
+
+  for (unsigned int y = startPosition; y < endPosition; y++) {
+    strip.setPixelColor(y, random(100, 255), random(100, 255), random(100, 255));  
+  }  
+  
+//  boolean blink_debouncePassed = (millis() - blinkLastTime > 1000);
+  
+//  if (blink_debouncePassed) {
+//    for (unsigned int y = startPosition; y < endPosition; y++) {
+//      strip.setPixelColor(y, random(240), random(150), random(10));  
+//    }
+//    blinkLastTime = millis();
+//  } else {
+//    for (unsigned int y = startPosition; y < endPosition; y++) {
+//      strip.setPixelColor(y, random(25), random(168), random(1));  
+//    }    
+//  }
   
   strip.show(); 
 }
