@@ -54,9 +54,8 @@ int led_lastTime = 0;
 // led colors
 int rgb_sleeping [3] = {255, 255, 255};
 int rgb_inserted [3] = {0, 0, 255};
-int rgb_advanced [3] = {255, 0, 0};
 int rgb_ejected [3] = {255, 255, 255};
-int rgb_deny [3] = {0, 255, 0};
+int rgb_deny [3] = {255, 168, 1};
 
 
 /* update functions */
@@ -373,9 +372,9 @@ void ModuleSet::updateBtnState() {
       led_moduleControl(_btnPin, rgb_inserted);
   } else {
     if (btnIsOn)
-      led_moduleControl(_btnPin, rgb_advanced);         
+      led_moduleRainbow(_btnPin);
     else 
-      led_moduleControl(_btnPin, rgb_sleeping);         
+      led_moduleControl(_btnPin, rgb_ejected);        
   }
 
   if (currentStage == "sleeping") 
@@ -621,28 +620,14 @@ void led_moduleControl(int btnPin, int rgb [3]) {
   strip.show();    
 }
 
-void led_rainbow(int btnPin) {
+void led_moduleRainbow(int btnPin) {
   uint16_t i, j;
   const int startPosition = getStartPosition(btnPin);
   const int endPosition = getEndPosition(startPosition);  
 
-  for (j = 0; j < 256; j++) {
-    for (i = startPosition; i < endPosition; i++) {
-      strip.setPixelColor(i, Wheel((i + j) & 255));
-    }
-    strip.show();
+  for (unsigned int y = startPosition; y < endPosition; y++) {
+    strip.setPixelColor(y, random(125), random(125), random(125));  
   }
-}
-
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if (WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if (WheelPos < 170) {
-    WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  
+  strip.show(); 
 }
