@@ -18,9 +18,15 @@ const int btnStartNum = 31;
 
 int incomingByte;
 
-const int tabletMovingDuration = 5000; 
+const int tabletMovingDuration = 5000;
 int insertedTabletsNum = 0;
 String currentStage = "sleeping";
+
+//Ada update
+int g = 0;
+int r = 255;
+int s = 2;
+//
 
 /* state flags */
 boolean isRunning = true; // true if user is here
@@ -39,7 +45,7 @@ const int clockPin = 3;
 // The offset is used to cycle colours along the strip
 int offset = 0;
 
-// Multiple is used to space out the spectrum, a value of 4 will be four 
+// Multiple is used to space out the spectrum, a value of 4 will be four
 // times as many cycles as a value of 1 on any given length
 const int multiple = 4;
 
@@ -293,7 +299,7 @@ void ModuleSet::updateBtnState() {
         break;
     }
   }
-  
+
   _btnRead = digitalRead(_btnPin);
   boolean debouncePassed = (_btnRead == false && _btnWasOn == true && millis() - _time > tabletMovingDuration);
   boolean readyToToggle = (debouncePassed && !btnIsLocked);
@@ -370,7 +376,7 @@ void ModuleSet::updateBtnState() {
         // update btnIsLocked
         btnIsLocked = true;
       }
-    } 
+    }
   }
 
   /* reset btnWasOn value for debounce function --*/
@@ -378,31 +384,74 @@ void ModuleSet::updateBtnState() {
 };
 
 /*-- led lights controlling depends on btnIsLocked value --*/
-void ModuleSet::controlLight() {    
+void ModuleSet::controlLight() {
   // change light as locked
   if (isActivatingStage) {
-      if (isPlayingSounds) {
-        led_moduleTalking(_btnPin, _blinkLastTime);
+    if (isPlayingSounds) {
+      led_moduleTalking(_btnPin, _blinkLastTime);
+    } else {
+      if (btnIsLocked) {
+        led_moduleControl(_btnPin, rgb_inserted);
       } else {
-        if (btnIsLocked) {
-          led_moduleControl(_btnPin, rgb_inserted); 
-        } else {
-          led_moduleControl(_btnPin, rgb_sleeping); 
-        }
+        led_moduleControl(_btnPin, rgb_sleeping);
       }
-      ledRgb_setColor(0, 255, 0);
+    }
+    //      ledRgb_setColor(0, 255, 0);
+
+    //-----ada update - green fade in fade out ----//
+    ledRgb_setColor(0, g, 0);
+    g = g + s;
+    if (g < 1 || g > 254) {
+      s = -s;
+    }
+    //--------------------------------------- //
+
   } else {
     if (btnIsOn) {
-      led_moduleRainbow(_btnPin);      
+      led_moduleRainbow(_btnPin);
     } else {
-      led_moduleControl(_btnPin, rgb_ejected);              
+      led_moduleControl(_btnPin, rgb_ejected);
     }
-    ledRgb_setColor(255, 0, 0);
+    //    ledRgb_setColor(255, 0, 0);
+
+    //-------- ada update ---------//
+    if (currentStage == "advanced_deactivated") {
+      //deactivated red fade out
+      ledRgb_setColor(r, 0, 0);   
+      if (r > 0) {
+        r--;
+      } else {
+        r = 0;
+      }
+    } else {
+      //uploading stage random color
+      unsigned int rgbColour[3];
+
+      // Start off with red.
+      rgbColour[0] = 255;
+      rgbColour[1] = 0;
+      rgbColour[2] = 0;
+
+      // Choose the colours to increment and decrement.
+      for (int decColour = 0; decColour < 3; decColour += 1) {
+        int incColour = decColour == 2 ? 0 : decColour + 1;
+
+        // cross-fade the two colours.
+        for (int i = 0; i < 255; i += 1) {
+          rgbColour[decColour] -= 1;
+          rgbColour[incColour] += 1;
+
+          ledRgb_setColor(rgbColour[0], rgbColour[1], rgbColour[2]);
+          // delay(5);
+        }
+      }
+    }
+    //--------------------//
   }
 
   if (currentStage == "sleeping") {
-    led_moduleControl(_btnPin, rgb_sleeping);         
-    ledRgb_setColor(255, 255, 255);    
+    led_moduleControl(_btnPin, rgb_sleeping);
+    ledRgb_setColor(255, 255, 255);
   }
 
   // blink as locked btn is pressed
@@ -412,7 +461,7 @@ void ModuleSet::controlLight() {
   if (toShowDenyLight) {
     led_moduleControl(_btnPin, rgb_deny);
     _denyLastTime = millis();
-  }  
+  }
 }
 
 void ModuleSet::moveTablet() {
@@ -533,12 +582,12 @@ void setup() {
 
   // init led
   strip.begin();
-  strip.show();  
+  strip.show();
 
   // init rgb led
   pinMode(ledRgbPin_r, OUTPUT);
   pinMode(ledRgbPin_g, OUTPUT);
-  pinMode(ledRgbPin_b, OUTPUT);    
+  pinMode(ledRgbPin_b, OUTPUT);
 }
 
 /*
@@ -579,7 +628,7 @@ void loop() {
   ModuleSet_7.controlLight();
   ModuleSet_8.controlLight();
   ModuleSet_9.controlLight();
-  ModuleSet_10.controlLight();  
+  ModuleSet_10.controlLight();
 }
 
 
@@ -592,34 +641,34 @@ int fmtBtnPinToLedPin(int btnPin) {
   switch (_moduloNum) {
     case 1:
       _fmtNum = 6;
-      break;      
+      break;
     case 2:
       _fmtNum = 7;
-      break;      
+      break;
     case 3:
       _fmtNum = 8;
       break;
     case 4:
       _fmtNum = 9;
-      break;            
+      break;
     case 5:
       _fmtNum = 0;
       break;
     case 6:
       _fmtNum = 5;
-      break;      
+      break;
     case 7:
       _fmtNum = 4;
-      break;      
+      break;
     case 8:
       _fmtNum = 3;
       break;
     case 9:
       _fmtNum = 2;
-      break;    
+      break;
     case 0:
       _fmtNum = 1;
-      break;        
+      break;
   }
   return _fmtNum;
 }
@@ -643,9 +692,9 @@ void led_default() {
 
 void led_allWhite() {
   for (unsigned int n = 0; n < strip.numPixels(); n++) {
-    strip.setPixelColor(n, 255, 255, 255);  
+    strip.setPixelColor(n, 255, 255, 255);
   }
-  strip.show();  
+  strip.show();
 }
 
 void led_moduleControl(int btnPin, int rgb [3]) {
@@ -653,44 +702,44 @@ void led_moduleControl(int btnPin, int rgb [3]) {
   const int endPosition = getEndPosition(startPosition);
 
   for (unsigned int y = startPosition; y < endPosition; y++) {
-    strip.setPixelColor(y, rgb[0], rgb[1], rgb[2]);  
+    strip.setPixelColor(y, rgb[0], rgb[1], rgb[2]);
   }
-  
-  strip.show();    
+
+  strip.show();
 }
 
 void led_moduleRainbow(int btnPin) {
   uint16_t i, j;
   const int startPosition = getStartPosition(btnPin);
-  const int endPosition = getEndPosition(startPosition);  
+  const int endPosition = getEndPosition(startPosition);
 
   for (unsigned int y = startPosition; y < endPosition; y++) {
-    strip.setPixelColor(y, random(125), random(125), random(125));  
+    strip.setPixelColor(y, random(125), random(125), random(125));
   }
-  
-  strip.show(); 
+
+  strip.show();
 }
 
 void led_moduleTalking(int btnPin, unsigned long blinkLastTime) {
   uint16_t i, j;
   const int startPosition = getStartPosition(btnPin);
-  const int endPosition = getEndPosition(startPosition);  
+  const int endPosition = getEndPosition(startPosition);
 
   for (unsigned int y = startPosition; y < endPosition; y++) {
-    strip.setPixelColor(y, random(100, 255), random(100, 255), random(100, 255));  
-  }  
-  
-  strip.show(); 
+    strip.setPixelColor(y, random(100, 255), random(100, 255), random(100, 255));
+  }
+
+  strip.show();
 }
 
 void ledRgb_setColor(int red, int green, int blue)
 {
-  #ifdef COMMON_ANODE
-    red = 255 - red;
-    green = 255 - green;
-    blue = 255 - blue;
-  #endif
+#ifdef COMMON_ANODE
+  red = 255 - red;
+  green = 255 - green;
+  blue = 255 - blue;
+#endif
   analogWrite(ledRgbPin_r, red);
   analogWrite(ledRgbPin_g, green);
-  analogWrite(ledRgbPin_b, blue);  
+  analogWrite(ledRgbPin_b, blue);
 }
