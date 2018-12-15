@@ -3,7 +3,7 @@
 */
 
 var serial
-var portName = '/dev/cu.usbmodem144201'
+var portName = '/dev/cu.usbmodem144101'
 
 var store = {
   currentState: 'sleeping',
@@ -324,7 +324,7 @@ function setup() {
 
 function draw() {
   /* interface control */
-  domElement.btn.addEventListener('click', function() {
+  domElement.body.addEventListener('click', function() {
     flags.startSession = true
     domElement.btn.classList.add('-is-hidden')
   })
