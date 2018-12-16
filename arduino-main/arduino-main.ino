@@ -61,7 +61,7 @@ int led_lastTime = 0;
 int rgb_sleeping [3] = {255, 255, 255};
 int rgb_inserted [3] = {0, 0, 255};
 int rgb_ejected [3] = {255, 0, 0};
-int rgb_deny [3] = {255, 75, 0};
+int rgb_deny [3] = {255, 0, 0};
 
 /* rgb led  */
 const int ledRgbPin_r = 7;
@@ -81,7 +81,7 @@ void update_insertedTabletsNum(boolean toIncrease) {
 
 /* state actions */
 void moveModule() {
-  if (currentStage == "regular_deactivated") isRunning = false;
+//  if (currentStage == "advanced_deactivated") isRunning = false;
 }
 
 /* state machine */
@@ -133,10 +133,6 @@ void update_stage() {
       } else {
         // enter condition switching
         switch (insertedTabletsNum) {
-          case regularFinal_end:
-            currentStage = "regular_deactivated";
-            moveModule();
-            break;
           case regularFinal_enter:
             currentStage = "regular_final";
             isActivatingStage = false;
@@ -246,18 +242,25 @@ void ModuleSet::updateBtnState() {
     // but only before activating final stage
     if (isActivatingStage) {
       btnIsLocked = true;
-      // or only one deactivation module left
-    } else if (!isActivatingStage && insertedTabletsNum == 1) {
+    }
+    // or only one deactivation module left
+    if (!isActivatingStage && insertedTabletsNum == 1) {
       btnIsLocked = true;
-      // or only when all modules are inserted
-    } else if (insertedTabletsNum == 10) {
+    }
+    if (!isActivatingStage) {
+      btnIsLocked = true;
+    }
+    // or only when all modules are inserted    
+    if (insertedTabletsNum == 10) {
       btnIsLocked = true;
     }
   } else {
     // reverse btn locked state after sound ends
     // but only do this in activating stage
     // or it'd unlock already ejected module
-    if (!btnIsOn && isActivatingStage) btnIsLocked = false;
+    if (!btnIsOn && isActivatingStage) {
+      btnIsLocked = false;
+    }
   }
 
   /*-- update module locked status in deactivation stage --*/
@@ -294,6 +297,9 @@ void ModuleSet::updateBtnState() {
       case 1:
         if (_btnPin == deactivateSequence[9] && !isPlayingSounds) btnIsLocked = false;
         break;
+      case 0:
+        btnIsLocked = true;
+        break;
       default:
         btnIsLocked = true;
         break;
@@ -321,8 +327,10 @@ void ModuleSet::updateBtnState() {
 
         // update inserted tablets number
         boolean enterLastTablet = !_btnWasOn && btnIsOn;
-        if (enterLastTablet) insertedTabletsNum = modulesNum;
-        else insertedTabletsNum -= 1;
+        if (enterLastTablet)
+          insertedTabletsNum = modulesNum;
+        else
+          insertedTabletsNum -= 1;
       }
 
     } else {
@@ -387,71 +395,34 @@ void ModuleSet::updateBtnState() {
 void ModuleSet::controlLight() {
   // change light as locked
   if (isActivatingStage) {
-    if (isPlayingSounds) {
-      led_moduleTalking(_btnPin, _blinkLastTime);
-    } else {
-      if (btnIsLocked) {
+//    if (isPlayingSounds) {
+//      led_moduleTalking(_btnPin, _blinkLastTime);
+//    } else {
+      if (btnIsLocked && btnIsOn) {
         led_moduleControl(_btnPin, rgb_inserted);
       } else {
         led_moduleControl(_btnPin, rgb_sleeping);
       }
-    }
-    //      ledRgb_setColor(0, 255, 0);
-
-    //-----ada update - green fade in fade out ----//
-    ledRgb_setColor(0, g, 0);
-    g = g + s;
-    if (g < 1 || g > 254) {
-      s = -s;
-    }
-    //--------------------------------------- //
-
+//    }
+//    ledRgb_green();
   } else {
+   
     if (btnIsOn) {
-      led_moduleRainbow(_btnPin);
+      led_moduleControl(_btnPin, rgb_sleeping);
+//      led_moduleRainbow(_btnPin);      
     } else {
-      led_moduleControl(_btnPin, rgb_ejected);
+      led_moduleControl(_btnPin, rgb_ejected);      
     }
-    //    ledRgb_setColor(255, 0, 0);
 
-    //-------- ada update ---------//
-    if (currentStage == "advanced_deactivated") {
-      //deactivated red fade out
-      ledRgb_setColor(r, 0, 0);   
-      if (r > 0) {
-        r--;
-      } else {
-        r = 0;
-      }
-    } else {
-      //uploading stage random color
-      unsigned int rgbColour[3];
-
-      // Start off with red.
-      rgbColour[0] = 255;
-      rgbColour[1] = 0;
-      rgbColour[2] = 0;
-
-      // Choose the colours to increment and decrement.
-      for (int decColour = 0; decColour < 3; decColour += 1) {
-        int incColour = decColour == 2 ? 0 : decColour + 1;
-
-        // cross-fade the two colours.
-        for (int i = 0; i < 255; i += 1) {
-          rgbColour[decColour] -= 1;
-          rgbColour[incColour] += 1;
-
-          ledRgb_setColor(rgbColour[0], rgbColour[1], rgbColour[2]);
-          // delay(5);
-        }
-      }
-    }
-    //--------------------//
+//    if (currentStage == "advanced_deactivated")
+//      ledRgb_deactivated();
+//    else
+//      ledRgb_random();
   }
 
   if (currentStage == "sleeping") {
     led_moduleControl(_btnPin, rgb_sleeping);
-    ledRgb_setColor(255, 255, 255);
+//    ledRgb_setColor(255, 255, 255);
   }
 
   // blink as locked btn is pressed
@@ -594,6 +565,14 @@ void setup() {
    loop
 */
 void loop() {
+//  if (Serial.available() > 0) {
+    incomingByte = Serial.read();
+    if (incomingByte == 'H')
+      isPlayingSounds = true;
+    else
+      isPlayingSounds = false;
+//  }
+    
   /*-- modules control --*/
   ModuleSet_1.moveTablet();
   ModuleSet_2.moveTablet();
@@ -606,29 +585,20 @@ void loop() {
   ModuleSet_9.moveTablet();
   ModuleSet_10.moveTablet();
 
+//  /*-- light control --*/
+//  ModuleSet_1.controlLight();
+//  ModuleSet_2.controlLight();
+//  ModuleSet_3.controlLight();
+//  ModuleSet_4.controlLight();
+//  ModuleSet_5.controlLight();
+//  ModuleSet_6.controlLight();
+//  ModuleSet_7.controlLight();
+//  ModuleSet_8.controlLight();
+//  ModuleSet_9.controlLight();
+//  ModuleSet_10.controlLight();  
+
   /*-- serial control --*/
   Serial.println(currentStage);
-
-  if (Serial.available() > 0) {
-    incomingByte = Serial.read();
-    if (incomingByte == 'H') {
-      isPlayingSounds = true;
-    } else {
-      isPlayingSounds = false;
-    }
-  }
-
-  /*-- light control --*/
-  ModuleSet_1.controlLight();
-  ModuleSet_2.controlLight();
-  ModuleSet_3.controlLight();
-  ModuleSet_4.controlLight();
-  ModuleSet_5.controlLight();
-  ModuleSet_6.controlLight();
-  ModuleSet_7.controlLight();
-  ModuleSet_8.controlLight();
-  ModuleSet_9.controlLight();
-  ModuleSet_10.controlLight();
 }
 
 
@@ -713,6 +683,10 @@ void led_moduleRainbow(int btnPin) {
   const int startPosition = getStartPosition(btnPin);
   const int endPosition = getEndPosition(startPosition);
 
+//  for (unsigned int y = startPosition; y < endPosition; y++) {
+//    strip.setPixelColor(y, 255, 255, 255);
+//  }  
+
   for (unsigned int y = startPosition; y < endPosition; y++) {
     strip.setPixelColor(y, random(125), random(125), random(125));
   }
@@ -725,11 +699,55 @@ void led_moduleTalking(int btnPin, unsigned long blinkLastTime) {
   const int startPosition = getStartPosition(btnPin);
   const int endPosition = getEndPosition(startPosition);
 
+//  for (unsigned int y = startPosition; y < endPosition; y++) {
+//    strip.setPixelColor(y, 255, 168, 1);
+//  }  
+
   for (unsigned int y = startPosition; y < endPosition; y++) {
     strip.setPixelColor(y, random(100, 255), random(100, 255), random(100, 255));
   }
 
   strip.show();
+}
+
+void ledRgb_deactivated() {
+  ledRgb_setColor(r, 0, 0);   
+  if (r > 0) {
+    r--;
+  } else {
+    r = 0;
+  }
+}
+
+void ledRgb_random() {
+  //uploading stage random color
+  unsigned int rgbColour[3];
+
+  // Start off with red.
+  rgbColour[0] = 255;
+  rgbColour[1] = 0;
+  rgbColour[2] = 0;
+
+  // Choose the colours to increment and decrement.
+  for (int decColour = 0; decColour < 3; decColour += 1) {
+    int incColour = decColour == 2 ? 0 : decColour + 1;
+
+    // cross-fade the two colours.
+    for (int i = 0; i < 255; i += 1) {
+      rgbColour[decColour] -= 1;
+      rgbColour[incColour] += 1;
+
+      ledRgb_setColor(rgbColour[0], rgbColour[1], rgbColour[2]);
+    }
+  }  
+}
+
+void ledRgb_green() {
+  ledRgb_setColor(0, g, 0);
+  g = g + s;
+  if (g < 1 || g > 254) {
+    s = -s;
+  }  
 }
 
 void ledRgb_setColor(int red, int green, int blue)

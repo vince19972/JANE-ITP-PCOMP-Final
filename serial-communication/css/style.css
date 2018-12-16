@@ -2,6 +2,9 @@ html, body {
 	color: #ecf0f1;
 	background-color: black;
 	font-family: 'Roboto Condensed', sans-serif;
+	max-height: 100vh;
+	max-width: 100vw;
+	overflow: hidden;
 }
 
 body.-warning {
