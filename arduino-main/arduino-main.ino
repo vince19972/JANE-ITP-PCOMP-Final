@@ -758,13 +758,13 @@ void led_moduleTalking(int btnPin, unsigned long blinkLastTime) {
 }
 
 void ledRgb_setColor(int red, int green, int blue)
-{  {
-  #ifdef COMMON_ANODE #ifdef COMMON_ANODE
-    red = 255 - red;    red = 255 - red;
-    green = 255 - green;    green = 255 - green;
-    blue = 255 - blue;    blue = 255 - blue;
-  #endif  #endif
-  analogWrite(ledRgbPin_r, red);    analogWrite(ledRgbPin_r, red);
-  analogWrite(ledRgbPin_g, green);    analogWrite(ledRgbPin_g, green);
-  analogWrite(ledRgbPin_b, blue);     analogWrite(ledRgbPin_b, blue);
-} }
+{
+#ifdef COMMON_ANODE
+  red = 255 - red;
+  green = 255 - green;
+  blue = 255 - blue;
+#endif
+  analogWrite(ledRgbPin_r, red);
+  analogWrite(ledRgbPin_g, green);
+  analogWrite(ledRgbPin_b, blue);
+}
