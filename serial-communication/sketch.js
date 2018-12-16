@@ -3,7 +3,7 @@
 */
 
 var serial
-var portName = '/dev/cu.usbmodem144201'
+var portName = '/dev/cu.usbmodem14311'
 
 var store = {
   currentState: 'sleeping',
@@ -66,9 +66,9 @@ var setter = {
 
     if (!flags.enteredState[store.currentState]) {
       store.lastTime = millis()
-      if (store.currentState == 'advanced_0') {
-        store.uploadLastTime = millis()
-      }
+      // if (store.currentState == 'advanced_0') {
+      //   store.uploadLastTime = millis()
+      // }
     }
 
     // update entered state of each module
@@ -105,7 +105,7 @@ var setter = {
     }
   },
   startUploadingTimer() {
-    if (millis() - store.uploadLastTime > 7000 && store.counter < uploadingVoice.length) {
+    if (millis() - store.uploadLastTime > 9500 && store.counter < uploadingVoice.length) {
       // console.log(millis() - store.uploadLastTime);
       // console.log("uploading in progess")
       s10.stop()
@@ -116,7 +116,7 @@ var setter = {
       store.counter++
       store.uploadLastTime = millis()
     } else if (d9.isPlaying() || d7.isPlaying() || d5.isPlaying() || d3.isPlaying() || d1.isPlaying()) {
-      uploadingSound.forEach(sound => sound.stop())
+      // uploadingSound.forEach(sound => sound.stop())
       store.uploadLastTime = millis()
     }
   },
@@ -241,16 +241,15 @@ osc3.volume.value = -30
 
 function preload() {
   //activating voice:
-  a0 = loadSound("./sounds/ActivationV3/a0.mp3")
-  a1 = loadSound("./sounds/ActivationV3/a1.mp3")
-  a3 = loadSound("./sounds/ActivationV3/a3.mp3")
-  a5 = loadSound("./sounds/ActivationV3/a5.mp3")
-  a7 = loadSound("./sounds/ActivationV3/a7.mp3")
-  a9 = loadSound("./sounds/ActivationV3/a9.mp3")
-  a10 = loadSound("./sounds/ActivationV3/a10.mp3")
-  exit = loadSound('./sounds/ActivationV3/exit.mp3')
-  urg1 = loadSound("./sounds/ActivationV3/urging 1.mp3")
-  urg2 = loadSound("./sounds/ActivationV3/urging 2.mp3")
+  a0 = loadSound("./sounds/ActivationV4/a0.mp3")
+  a1 = loadSound("./sounds/ActivationV4/a1.mp3")
+  a3 = loadSound("./sounds/ActivationV4/a3.mp3")
+  a5 = loadSound("./sounds/ActivationV4/a5.mp3")
+  a7 = loadSound("./sounds/ActivationV4/a7.mp3")
+  a9 = loadSound("./sounds/ActivationV4/a9.mp3")
+  a10 = loadSound("./sounds/ActivationV4/a10.mp3")
+  exit = loadSound('./sounds/ActivationV4/exit.mp3')
+  urg1 = loadSound("./sounds/ActivationV4/urging.mp3")
 
   //deactivating voice
   d9 = loadSound("./sounds/Deactivation/d9.mp3")
@@ -261,12 +260,18 @@ function preload() {
   d0 = loadSound("./sounds/Deactivation/d0.mp3")
 
   // uploading voices files
-  u1 = loadSound('./sounds/Uploading/1initialize.mp3')
-  u2 = loadSound('./sounds/Uploading/2scanning.mp3')
-  u3 = loadSound('./sounds/Uploading/3mapping.mp3')
-  u4 = loadSound('./sounds/Uploading/4reestablishing.mp3')
-  u5 = loadSound('./sounds/Uploading/5uploading.mp3')
-  u6 = loadSound('./sounds/Uploading/Congratulations.mp3')
+  u1 = loadSound('./sounds/Uploading/u1.mp3')
+  u2 = loadSound('./sounds/Uploading/u2.mp3')
+  u3 = loadSound('./sounds/Uploading/u3.mp3')
+  u4 = loadSound('./sounds/Uploading/u4.mp3')
+  u5 = loadSound('./sounds/Uploading/u5.mp3')
+  u6 = loadSound('./sounds/Uploading/u6.mp3')
+  // u1 = loadSound('./sounds/Uploading/1initialize.mp3')
+  // u2 = loadSound('./sounds/Uploading/2scanning.mp3')
+  // u3 = loadSound('./sounds/Uploading/3mapping.mp3')
+  // u4 = loadSound('./sounds/Uploading/4reestablishing.mp3')
+  // u5 = loadSound('./sounds/Uploading/5uploading.mp3')
+  // u6 = loadSound('./sounds/Uploading/Congratulations.mp3')
 
   // testing voice files
   // a0 = loadSound('./sounds/ActivationTest/a0.mp3')
@@ -308,7 +313,7 @@ function setup() {
   /* sound settings */
   uploadingVoice = [u1, u2, u3, u4, u5, u6]
   uploadingSound = [s11, s12, s13, s14]
-  actDeactVoice = [a0, a1, a3, a5, a7, a9, a10, d1]
+  actDeactVoice = [a0, a1, a3, a5, a7, a9, a10]
 
   /* timer settings */
   // move to start session button click function
@@ -390,8 +395,7 @@ function draw() {
           startTime: false
         }, false, a7.isPlaying())
         break
-      // case 'regular_final':
-      //   break
+
       case 'regular_deactivated':
         console.log('regular deactivated')
         setter.activateAction({
@@ -422,7 +426,9 @@ function draw() {
           s7.stop()
         }, a9.isPlaying())
         // update showSequence to control interface
-        store.showSequence = true
+        if(!a10.isPlaying()){
+          store.showSequence = true
+        }
         break
       case 'advanced_1':
         if (!a10.isPlaying() && !getter.uploadingVoiceIsPlaying() && !flags.enteredState[store.currentState]) {
@@ -462,7 +468,7 @@ function draw() {
         })
         break
       case 'advanced_final':
-        setter.deactivateAction(d1, false, true)
+        setter.deactivateAction(d1, false, false)
         break
       case 'advanced_deactivated':
         setter.deactivateAction(d0, false, true)
