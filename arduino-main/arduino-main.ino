@@ -407,60 +407,61 @@ void ModuleSet::controlLight() {
     //      }
     //    }
 
-     //      ledRgb_setColor(0, 255, 0);
-     //-----ada update - green fade in fade out ----//
+    //      ledRgb_setColor(0, 255, 0);
+    //-----ada update - green fade in fade out ----//
     ledRgb_setColor(0, g, 0);
     g = g + s;
     if (g < 1 || g > 254) {
       s = -s;
     }
     //--------------------------------------- //
-    
+
   } else {
     if (btnIsOn)
       led_moduleRainbow(_btnPin);
     else
       led_moduleControl(_btnPin, rgb_ejected);
 
-  //    ledRgb_setColor(255, 0, 0);
+    //    ledRgb_setColor(255, 0, 0);
 
     //-------- ada update ---------//
     if (currentStage == "advanced_deactivated") {
       //deactivated red fade out
-      ledRgb_setColor(r, 0, 0);   
+      ledRgb_setColor(r, 0, 0);
       if (r > 0) {
         r--;
       } else {
         r = 0;
       }
     } else {
-//      //uploading stage random color
-//      unsigned int rgbColour[3];
-//
-//      // Start off with red.
-//      rgbColour[0] = 255;
-//      rgbColour[1] = 0;
-//      rgbColour[2] = 0;
-//
-//      // Choose the colours to increment and decrement.
-//      for (int decColour = 0; decColour < 3; decColour += 1) {
-//        int incColour = decColour == 2 ? 0 : decColour + 1;
-//
-//        // cross-fade the two colours.
-//        for (int i = 0; i < 255; i += 1) {
-//          rgbColour[decColour] -= 1;
-//          rgbColour[incColour] += 1;
-//
-//          ledRgb_setColor(rgbColour[0], rgbColour[1], rgbColour[2]);
-//        }
-//      }
-    ledRgb_setColor(255,0,0);
+      ledRgb_setColor(255, 0, 0);
+
+      //      //uploading stage random color
+      //      unsigned int rgbColour[3];
+      //
+      //      // Start off with red.
+      //      rgbColour[0] = 255;
+      //      rgbColour[1] = 0;
+      //      rgbColour[2] = 0;
+      //
+      //      // Choose the colours to increment and decrement.
+      //      for (int decColour = 0; decColour < 3; decColour += 1) {
+      //        int incColour = decColour == 2 ? 0 : decColour + 1;
+      //
+      //        // cross-fade the two colours.
+      //        for (int i = 0; i < 255; i += 1) {
+      //          rgbColour[decColour] -= 1;
+      //          rgbColour[incColour] += 1;
+      //
+      //          ledRgb_setColor(rgbColour[0], rgbColour[1], rgbColour[2]);
+      //        }
+      //      }
+      //--------------------//
 
     }
-    //--------------------//
   }
 
-  if (currentStage == "sleeping"){
+  if (currentStage == "sleeping") {
     led_moduleControl(_btnPin, rgb_sleeping);
     ledRgb_setColor(255, 255, 255);
   }
@@ -596,7 +597,7 @@ void setup() {
   strip.begin();
   strip.show();
 
-    // init rgb led
+  // init rgb led
   pinMode(ledRgbPin_r, OUTPUT);
   pinMode(ledRgbPin_g, OUTPUT);
   pinMode(ledRgbPin_b, OUTPUT);

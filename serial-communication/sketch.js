@@ -105,7 +105,7 @@ var setter = {
     }
   },
   startUploadingTimer() {
-    if (millis() - store.uploadLastTime > 9500 && store.counter < uploadingVoice.length) {
+    if (millis() - store.uploadLastTime > 10000 && store.counter < uploadingVoice.length) {
       // console.log(millis() - store.uploadLastTime);
       // console.log("uploading in progess")
       s10.stop()
