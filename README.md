@@ -1,5 +1,9 @@
 # ITP Physical Computing Final Project: Jane
 
+![JANE visual](https://mir-s3-cdn-cf.behance.net/project_modules/fs/32f49d73854341.5c17eb0b9b605.jpg)
+
+👉 Case study [is here](https://www.vinceshao.com/works/jane-interactive-installation)
+
 ## Arduino & p5.js Interaction
 
 - Open one terminal window, `cd` to directory `serial-communication`
